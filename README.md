@@ -1,17 +1,33 @@
 # Saffron & Sage
 
 **Smart Restaurant Ordering, Reservation and Management System**  
-PES University DBMS mini-project · Next.js + PostgreSQL + MongoDB · Entirely native and local
+DBMS mini-project · Next.js + PostgreSQL + MongoDB · Entirely native and local
 
 A complete restaurant application with customer ordering and reservations, a staff kitchen board, and a manager dashboard. PostgreSQL owns transactional data and all prices; MongoDB stores reviews, preferences and customization documents. The nine submitted relational entities and relationships are preserved. The original 13-page submission is retained in `docs/reference/original-submission.pdf` and its SQL in `database/sql/original-submission.sql`.
 
-## Start on this Mac
+## Quick start
 
-From Terminal:
+Use the following placeholders for your own checkout and tool locations:
+
+- `<REPOSITORY_URL>`: the Git URL of your copy of this project.
+- `<PROJECT_DIRECTORY>`: the directory containing this project's `package.json`.
+- `<NODE_24_BIN_DIRECTORY>`: the `bin` directory for your Node.js 24 installation, if a PATH override is needed.
+
+For a new checkout:
 
 ```bash
-cd "/Users/adityapatil/.codex/.chatgpt-projects/g-p-6a5bba46d700819196cf98ad6cee9d68/restaurant-management"
-export PATH="/opt/homebrew/opt/node@24/bin:$PATH"
+git clone "<REPOSITORY_URL>" restaurant-management
+cd restaurant-management
+npm install
+npm run setup:local
+npm run dev
+```
+
+For an already configured checkout, replace the placeholders before running:
+
+```bash
+cd "<PROJECT_DIRECTORY>"
+export PATH="<NODE_24_BIN_DIRECTORY>:$PATH"
 npm run db:start
 npm run dev
 ```
@@ -25,25 +41,23 @@ npm run build
 npm start
 ```
 
-`npm run db:stop` stops only this checkout's database processes. It preserves data. The app does not need to run with administrator/root privileges. Node 24 is explicitly selected because installing mongosh also installed a separate Node 26 binary on this Mac.
+`npm run db:stop` stops only this checkout's database processes. It preserves data. The app does not need to run with administrator/root privileges. Use Node.js 24 LTS. If several Node versions are installed, select Node 24 before running project commands.
 
 ## Demo accounts
 
-Setup generates a random demo password. Open **`.data/demo-credentials.json`** locally; its `password` is shared by the demo accounts below. This file is ignored by Git and should not be shared. New customers can register in the UI.
+Setup generates local demo credentials in **`.data/demo-credentials.json`**. Use the actual email addresses and password from that file to sign in. The identifiers below are illustrative placeholders, not login credentials. The generated credential file is ignored by Git and should not be shared. New customers can register in the UI.
 
-| Account | Email | Sign-in tab | Permissions |
+| Account | Email placeholder | Sign-in tab | Permissions |
 | --- | --- | --- | --- |
-| Customer | rahul@gmail.com | I'm a guest | Orders, own bills, reservations, reviews, preferences |
-| Customer | ananya@gmail.com | I'm a guest | Independent customer records |
-| Customer | arjun@gmail.com | I'm a guest | Independent customer records |
-| Manager / administrator | vikram@restaurant.com | Restaurant team | All management and reporting |
-| Chef | karan@restaurant.com | Restaurant team | Prepare and mark orders ready |
-| Waiter | priya@restaurant.com | Restaurant team | Kitchen, serving, reservations and occupancy |
-| Cashier | meera@restaurant.com | Restaurant team | Simulated payment and closing served, paid orders |
+| Customer | `<CUSTOMER_EMAIL>` | I'm a guest | Orders, own bills, reservations, reviews, preferences |
+| Manager / administrator | `<MANAGER_EMAIL>` | Restaurant team | All management and reporting |
+| Chef | `<CHEF_EMAIL>` | Restaurant team | Prepare and mark orders ready |
+| Waiter | `<WAITER_EMAIL>` | Restaurant team | Kitchen, serving, reservations and occupancy |
+| Cashier | `<CASHIER_EMAIL>` | Restaurant team | Simulated payment and closing served, paid orders |
 
 Passwords are scrypt hashes in PostgreSQL. The submission's plaintext example passwords are never used by the application. Original SQL is historical reference only.
 
-## Fresh install on a second Mac
+## macOS installation
 
 Copy or clone this repository **without** `.env`, `.data`, `.tools`, `node_modules`, `.next`, or `logs`. Each machine creates independent records and credentials. Never copy live database data directories between machines.
 
@@ -62,13 +76,13 @@ Initial package downloads require internet. Once installed, all application page
 
 ## Windows installation (PowerShell)
 
-Windows instructions and cross-platform code are included; execution was verified on macOS, not on a Windows machine.
+Use PowerShell for the following examples. Replace installation-path placeholders with the directories used on your system. Platform verification coverage is documented in `docs/testing.md`.
 
 1. Install Git for Windows, Node.js 24 LTS, PostgreSQL 17, MongoDB Community Server 8 and mongosh using the official installers. Links and a prerequisite audit are in `scripts/install-native-windows.ps1`.
 2. Add the native binaries to your user PATH, for example:
 
 ```powershell
-$env:Path = "C:\Program Files\nodejs;C:\Program Files\PostgreSQL\17\bin;C:\Program Files\MongoDB\Server\8.0\bin;" + $env:Path
+$env:Path = "<NODE_INSTALL_DIRECTORY>;<POSTGRESQL_BIN_DIRECTORY>;<MONGODB_BIN_DIRECTORY>;<MONGOSH_BIN_DIRECTORY>;" + $env:Path
 node --version
 npm --version
 psql --version
@@ -76,7 +90,7 @@ mongod --version
 mongosh --version
 ```
 
-3. Use a short, user-writable folder such as `C:\Projects\restaurant-management`. On a fresh install, leave database services unstarted so setup can initialize its own clusters. Setup starts native processes without installing system services.
+3. Use a short, user-writable folder such as `<PROJECT_DIRECTORY>`. On a fresh install, leave database services unstarted so setup can initialize its own clusters. Setup starts native processes without installing system services.
 4. Run:
 
 ```powershell
@@ -95,7 +109,7 @@ Setup creates a permission-restricted `.env` with random PostgreSQL, MongoDB and
 - MongoDB: `restaurant_management_nosql`, port 27017, authenticated `restaurant_app` with read/write access to this database only.
 - Setup-only owners: `restaurant_owner`, with credentials in `.env`. The runtime uses the limited application credentials.
 - Generated database files: `.data/postgres` and `.data/mongo`.
-- Native MongoDB fallback: `.tools/mongodb/bin/mongod` on this Mac.
+- Optional project-local MongoDB fallback: `.tools/mongodb/bin/mongod` when installed by the macOS prerequisite script.
 
 For an existing PostgreSQL instance, provide an administrator URL as `PG_ADMIN_URL` in `.env`. Setup only creates the named project role/database if missing; it never resets existing role passwords. Supply a matching `DATABASE_URL` if that project role already exists.
 
