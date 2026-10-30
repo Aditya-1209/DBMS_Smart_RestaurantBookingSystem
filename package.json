@@ -1,0 +1,56 @@
+{
+  "name": "saffron-table",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1 --port 3000",
+    "build": "next build --webpack",
+    "start": "next start --hostname 127.0.0.1 --port 3000",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "setup:local": "tsx scripts/setup.ts",
+    "db:start": "tsx scripts/services.ts start",
+    "db:stop": "tsx scripts/services.ts stop",
+    "db:check": "tsx scripts/check.ts",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:reconcile": "tsx scripts/reconcile.ts",
+    "test": "node --import tsx --test tests/integration.test.ts",
+    "test:e2e": "node --env-file=.env node_modules/@playwright/test/cli.js test",
+    "postinstall": "prisma generate",
+    "test:recovery": "node --import tsx tests/failure-recovery.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.0",
+    "dotenv": "^17.2.0",
+    "lucide-react": "^0.468.0",
+    "mongodb": "^6.20.0",
+    "mongoose": "^8.19.0",
+    "next": "^16.0.0",
+    "pg": "^8.16.0",
+    "prisma": "6.19.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.0.0",
+    "prettier": "^3.6.2",
+    "tailwindcss": "^4.1.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  },
+  "overrides": {
+    "deepmerge-ts": "8.0.2",
+    "effect": "^3.20.0 <4"
+  }
+}

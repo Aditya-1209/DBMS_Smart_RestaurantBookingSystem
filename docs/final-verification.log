@@ -1,0 +1,37 @@
+Production API health: { postgresql: 'connected', mongodb: 'connected' }
+Production page: /menu 200
+Production page: /login 200
+Anonymous admin access redirected to login.
+Production records match pre-restart database baseline: {
+  customers: 3,
+  menu: 12,
+  orders: 8,
+  payments: 4,
+  reservations: 1,
+  reviews: 3,
+  preferences: 3,
+  customizations: 17,
+  sample_total: 880
+}
+Database timezone: [ { TimeZone: 'Asia/Kolkata' } ]
+Applied migrations: [
+  { migration_name: '202610300001_initial' },
+  { migration_name: '202610300002_restaurant_timezone' }
+]
+Pending customization jobs: 0
+Native mongosh connectivity: {
+  ok: 1
+}
+[
+  'order_customizations',
+  'reviews',
+  'customer_preferences'
+]
+Node: v24.22.2
+psql (PostgreSQL) 17.11 (Homebrew)
+2.14.0
+PASS: production application and native database persistence verified.
+COMMAND    PID        USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+postgres 34334 adityapatil    5u  IPv4 0xe77a58875fcbc251      0t0  TCP 127.0.0.1:5432 (LISTEN)
+mongod   39663 adityapatil   10u  IPv4 0xec55f6e502107456      0t0  TCP 127.0.0.1:27017 (LISTEN)
+node     41388 adityapatil   12u  IPv4 0xdc7bc3ceece4aaf7      0t0  TCP 127.0.0.1:3000 (LISTEN)

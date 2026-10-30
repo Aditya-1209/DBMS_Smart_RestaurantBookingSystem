@@ -1,0 +1,12 @@
+
+> saffron-table@1.0.0 test:e2e
+> node --env-file=.env node_modules/@playwright/test/cli.js test --grep administrator
+
+
+Running 1 test using 1 worker
+
+(node:41758) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/e2e/restaurant.spec.ts:250:5 › administrator dashboard, real reports and category CRUD (957ms)
+
+  1 passed (1.7s)

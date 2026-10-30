@@ -1,0 +1,17 @@
+
+> saffron-table@1.0.0 test:e2e
+> node --env-file=.env node_modules/@playwright/test/cli.js test
+
+
+Running 6 tests using 1 worker
+
+(node:39465) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 tests/e2e/restaurant.spec.ts:58:5 › menu, category filters, search, customized basket and local assets (1.2s)
+  ✓  2 tests/e2e/restaurant.spec.ts:117:5 › customer registration, submitted ₹880 order, simulated payment and review (1.0s)
+  ✓  3 tests/e2e/restaurant.spec.ts:162:5 › customer booking, confirmation and cancellation (867ms)
+  ✓  4 tests/e2e/restaurant.spec.ts:204:5 › chef, waiter and cashier complete the paid customer order (1.3s)
+  ✓  5 tests/e2e/restaurant.spec.ts:250:5 › administrator dashboard, real reports and category CRUD (706ms)
+  ✓  6 tests/e2e/restaurant.spec.ts:293:5 › mobile layout, mobile cart and no horizontal overflow (423ms)
+
+  6 passed (6.3s)

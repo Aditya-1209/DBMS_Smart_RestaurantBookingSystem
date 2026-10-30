@@ -1,0 +1,28 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+
+✔ Generated Prisma Client (v6.19.0) to ./node_modules/@prisma/client in 82ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma/schema.prisma
+Datasource "db": PostgreSQL database "restaurant_management", schema "public" at "127.0.0.1:5432"
+
+2 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+Idempotent seed verified: 9 core entities, 12 dishes, 8 sample orders. Submitted sample bill: ₹880.
+Generated demo credentials: .data/demo-credentials.json (ignored by Git).
+PostgreSQL: [
+  {
+    database: 'restaurant_management',
+    version: 'PostgreSQL 17.11 (Homebrew) on aarch64-apple-darwin27.0.0, compiled by Apple clang version 21.0.0 (clang-2100.3.34.2), 64-bit'
+  }
+]
+MongoDB: { ok: 1 }
+Core records: { customers: 3, menu: 12, orders: 8 }
+Setup verified. Run npm run dev. Demo credentials are listed in README.md.

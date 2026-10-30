@@ -1,0 +1,8 @@
+
+> saffron-table@1.0.0 test:recovery
+> node --import tsx tests/failure-recovery.ts
+
+Native project MongoDB stopped; PostgreSQL remains available.
+Order committed at ₹220 while MongoDB offline; customization pending = true.
+Kitchen instructions retrieved from durable SQL outbox during outage.
+MongoDB restarted; pending document synchronized exactly once. PASS

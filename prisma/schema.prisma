@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model Customer {
+  customer_id Int @id @default(autoincrement())
+  name String @db.VarChar(100)
+  email String @unique @db.VarChar(150)
+  phone String @unique @db.VarChar(15)
+  password String @db.VarChar(255)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  orders Orders[]
+  reservations Reservation[]
+  sessions Session[]
+  @@map("customer")
+}
+model Staff {
+  staff_id Int @id @default(autoincrement())
+  name String @db.VarChar(100)
+  email String @unique @db.VarChar(150)
+  phone String @unique @db.VarChar(15)
+  role String @db.VarChar(30)
+  password String @db.VarChar(255)
+  active Boolean @default(true)
+  orders Orders[]
+  sessions Session[]
+  @@map("staff")
+}
+model RestaurantTable {
+  table_id Int @id @default(autoincrement())
+  table_number Int @unique
+  capacity Int
+  status String @default("Available") @db.VarChar(20)
+  orders Orders[]
+  reservations Reservation[]
+  @@map("restaurant_table")
+}
+model Category {
+  category_id Int @id @default(autoincrement())
+  category_name String @unique @db.VarChar(50)
+  items MenuItem[]
+  @@map("category")
+}
+model MenuItem {
+  item_id Int @id @default(autoincrement())
+  category_id Int
+  item_name String @db.VarChar(100)
+  description String?
+  price Decimal @db.Decimal(10,2)
+  availability Boolean @default(true)
+  image String @default("/images/paneer.svg")
+  vegetarian Boolean @default(true)
+  category Category @relation(fields:[category_id], references:[category_id], onDelete:Restrict)
+  lines OrderItem[]
+  @@index([category_id])
+  @@map("menu_item")
+}
+model Reservation {
+  reservation_id Int @id @default(autoincrement())
+  customer_id Int
+  table_id Int
+  reservation_date DateTime @db.Date
+  reservation_time DateTime @db.Time(6)
+  duration_minutes Int @default(90)
+  starts_at DateTime @default(dbgenerated()) @db.Timestamp(6)
+  ends_at DateTime @default(dbgenerated()) @db.Timestamp(6)
+  guest_count Int
+  status String @default("Confirmed") @db.VarChar(20)
+  customer Customer @relation(fields:[customer_id], references:[customer_id], onDelete:Cascade)
+  table RestaurantTable @relation(fields:[table_id], references:[table_id], onDelete:Restrict)
+  @@index([customer_id])
+  @@map("reservation")
+}
+model Orders {
+  order_id Int @id @default(autoincrement())
+  customer_id Int
+  table_id Int?
+  staff_id Int?
+  order_date DateTime @default(dbgenerated("CURRENT_DATE")) @db.Date
+  order_time DateTime @default(dbgenerated("CURRENT_TIME")) @db.Time(6)
+  status String @default("Placed") @db.VarChar(20)
+  total_amount Decimal @default(0) @db.Decimal(10,2)
+  idempotency_key String? @unique @db.VarChar(100)
+  customer Customer @relation(fields:[customer_id], references:[customer_id], onDelete:Restrict)
+  table RestaurantTable? @relation(fields:[table_id], references:[table_id], onDelete:SetNull)
+  staff Staff? @relation(fields:[staff_id], references:[staff_id], onDelete:SetNull)
+  items OrderItem[]
+  payment Payment?
+  @@index([customer_id])
+  @@index([status])
+  @@map("orders")
+}
+model OrderItem {
+  order_item_id Int @id @default(autoincrement())
+  order_id Int
+  item_id Int
+  quantity Int
+  unit_price Decimal @db.Decimal(10,2)
+  subtotal Decimal @default(dbgenerated()) @db.Decimal(10,2)
+  status String @default("Placed") @db.VarChar(20)
+  order Orders @relation(fields:[order_id], references:[order_id], onDelete:Cascade)
+  item MenuItem @relation(fields:[item_id], references:[item_id], onDelete:Restrict)
+  @@index([order_id])
+  @@index([item_id])
+  @@map("order_item")
+}
+model Payment {
+  payment_id Int @id @default(autoincrement())
+  order_id Int @unique
+  amount Decimal @db.Decimal(10,2)
+  payment_method String @db.VarChar(20)
+  payment_status String @default("Pending") @db.VarChar(20)
+  payment_time DateTime @default(now()) @db.Timestamp(6)
+  order Orders @relation(fields:[order_id], references:[order_id], onDelete:Cascade)
+  @@index([payment_status])
+  @@map("payment")
+}
+model Session {
+  token_hash String @id
+  customer_id Int?
+  staff_id Int?
+  expires_at DateTime @db.Timestamptz(6)
+  customer Customer? @relation(fields:[customer_id], references:[customer_id], onDelete:Cascade)
+  staff Staff? @relation(fields:[staff_id], references:[staff_id], onDelete:Cascade)
+  @@index([expires_at])
+  @@map("session")
+}
+model Outbox {
+  id Int @id @default(autoincrement())
+  order_id Int @unique
+  payload Json
+  processed_at DateTime? @db.Timestamptz(6)
+  attempts Int @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  @@map("outbox")
+}
+model LoginAttempt {
+  key String @id
+  count Int @default(0)
+  window_start DateTime @default(now()) @db.Timestamptz(6)
+  @@map("login_attempt")
+}
