@@ -125,7 +125,7 @@ For an existing MongoDB instance, set `MONGO_ADMIN_URL` for setup if administrat
 ## Demonstration walkthrough
 
 1. Open the menu. Search, filter by category or vegetarian dishes, and open a dish to see details/reviews and customize it.
-2. Add **2 Paneer Tikka + 1 Veg Biryani + 2 Fresh Lime Soda**. The basket and server bill equal **₹880**. Customization options have no price surcharge in this project; each addition creates an independent order line.
+2. Add **2 Paneer Tikka + 1 Veg Biryani + 2 Fresh Lime Soda**. The basket and server bill equal **₹880**. Use Regular portions for this example. Large portions cost 50% more (₹220 → ₹330), rounded to the nearest paise; the dialog, basket and server bill use the selected portion price. Kitchen notes are included, and each addition creates an independent order line.
 3. Sign in as a customer and place a takeaway order. Refreshing or retrying the same checkout token does not create another order.
 4. Open the order, print the bill, choose Cash/Card/UPI, and simulate payment. No real money moves and no card data is collected. Submit or edit an overall and per-dish review.
 5. Book a table for a future time. A 19:00–20:30 reservation conflicts with 19:30–21:00 on that table; a booking starting at 20:30 is allowed. All booking times use **Asia/Kolkata**. Only future reservations can be customer-cancelled.

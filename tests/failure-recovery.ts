@@ -70,8 +70,6 @@ async function main() {
         quantity: 1,
         customizations: {
           size: "Regular",
-          crust: "Classic",
-          extra_cheese: true,
           remove: [],
           add: [],
           special_instruction:

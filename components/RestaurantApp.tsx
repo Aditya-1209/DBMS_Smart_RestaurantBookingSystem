@@ -39,6 +39,8 @@ import {
   instructions,
   splitList,
 } from "./shared";
+import { portionPrice } from "../lib/pricing";
+import { customization } from "../lib/validations";
 import Reservations from "./Reservations";
 import Orders from "./Orders";
 import StaffDashboard from "./StaffDashboard";
@@ -46,8 +48,6 @@ import AdminDashboard from "./AdminDashboard";
 import Preferences from "./Preferences";
 const freshCustom = (): Custom => ({
   size: "Regular",
-  crust: "Classic",
-  extra_cheese: false,
   remove: [],
   add: [],
   special_instruction: "",
@@ -106,7 +106,17 @@ export default function RestaurantApp({ view }: { view: string }) {
             (l) => l.item?.item_id && l.quantity > 0 && l.customizations,
           )
         )
-          setCart(saved);
+          setCart(
+            saved.flatMap((line) => {
+              // Strip retired options from baskets saved by older app versions.
+              const parsed = customization
+                .strip()
+                .safeParse(line.customizations);
+              return parsed.success
+                ? [{ ...line, customizations: parsed.data }]
+                : [];
+            }),
+          );
       } catch {
         /* Discard corrupted browser-only cart. */
       }
@@ -200,7 +210,11 @@ export default function RestaurantApp({ view }: { view: string }) {
       setCheckoutBusy(false);
     }
   }
-  const total = cart.reduce((s, l) => s + Number(l.item.price) * l.quantity, 0),
+  const total = cart.reduce(
+      (s, l) =>
+        s + portionPrice(l.item.price, l.customizations.size) * l.quantity,
+      0,
+    ),
     count = cart.reduce((s, l) => s + l.quantity, 0);
   const visible = menu.filter(
     (m) =>
@@ -236,7 +250,12 @@ export default function RestaurantApp({ view }: { view: string }) {
               <div className="cart-line" key={l.key}>
                 <div className="row between">
                   <b>{l.item.item_name}</b>
-                  <span>{money(Number(l.item.price) * l.quantity)}</span>
+                  <span>
+                    {money(
+                      portionPrice(l.item.price, l.customizations.size) *
+                        l.quantity,
+                    )}
+                  </span>
                 </div>
                 {instructions(l.customizations) && (
                   <p>{instructions(l.customizations)}</p>
@@ -729,48 +748,29 @@ export default function RestaurantApp({ view }: { view: string }) {
             <span className="badge available">
               {dish.vegetarian ? "Vegetarian" : "Non-vegetarian"}
             </span>
-            <b>{money(dish.price)}</b>
+            <b>{money(portionPrice(dish.price, custom.size))}</b>
           </div>
           <p className="muted">{dish.description}</p>
           <h3>Make it yours</h3>
           <p className="fine-print">
-            Customizations are included at the listed price. Each addition
-            creates a separate order line.
+            Large portions cost 50% more than Regular. Kitchen notes are
+            included. Each addition creates a separate order line.
           </p>
           <div className="form-grid">
             <label className="field">
               Size
               <select
+                aria-label="Size"
                 value={custom.size}
                 onChange={(e) => setCustom({ ...custom, size: e.target.value })}
               >
-                <option>Regular</option>
-                <option>Large</option>
-              </select>
-            </label>
-            <label className="field">
-              Preparation
-              <select
-                value={custom.crust}
-                onChange={(e) =>
-                  setCustom({ ...custom, crust: e.target.value })
-                }
-              >
-                <option value="Classic">Classic</option>
-                <option value="Thin">Thin crust (where applicable)</option>
+                <option value="Regular">Regular · {money(dish.price)}</option>
+                <option value="Large">
+                  Large · {money(portionPrice(dish.price, "Large"))}
+                </option>
               </select>
             </label>
           </div>
-          <label className="checkbox">
-            <input
-              type="checkbox"
-              checked={custom.extra_cheese}
-              onChange={(e) =>
-                setCustom({ ...custom, extra_cheese: e.target.checked })
-              }
-            />
-            Extra cheese (where applicable)
-          </label>
           <div className="form-grid">
             <label className="field">
               Leave out

@@ -5,7 +5,8 @@ export const money = (n: string | number) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(Number(n));
 export async function api<T = Record<string, unknown>>(
   url: string,
@@ -99,16 +100,12 @@ export const splitList = (s: string) =>
     .filter(Boolean);
 export const instructions = (c: {
   size: string;
-  crust: string;
-  extra_cheese: boolean;
   remove: string[];
   add: string[];
   special_instruction: string;
 }) =>
   [
     c.size !== "Regular" ? c.size : "",
-    c.crust !== "Classic" ? c.crust + " crust" : "",
-    c.extra_cheese ? "Extra cheese" : "",
     c.remove?.length ? "No " + c.remove.join(", ") : "",
     c.add?.length ? "Add " + c.add.join(", ") : "",
     c.special_instruction,

@@ -19,8 +19,6 @@ export type Menu = {
 };
 export type Custom = {
   size: string;
-  crust: string;
-  extra_cheese: boolean;
   remove: string[];
   add: string[];
   special_instruction: string;

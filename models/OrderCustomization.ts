@@ -6,8 +6,6 @@ const schema = new Schema(
     item_id: { type: Number, required: true },
     customizations: {
       size: String,
-      crust: String,
-      extra_cheese: Boolean,
       remove: [String],
       add: [String],
       special_instruction: String,

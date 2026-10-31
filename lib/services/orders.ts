@@ -4,6 +4,7 @@ import { mongodb } from "../mongodb";
 import { OrderCustomization } from "../../models/OrderCustomization";
 import { HttpError, type Actor } from "../auth";
 import { orderInput } from "../validations";
+import { portionPrice } from "../pricing";
 export async function reconcile(orderId?: number) {
   const jobs = await prisma.outbox.findMany({
     where: { processed_at: null, ...(orderId ? { order_id: orderId } : {}) },
@@ -95,7 +96,10 @@ export async function placeOrder(actor: Actor, raw: unknown) {
           order_id: o.order_id,
           item_id: i.item_id,
           quantity: i.quantity,
-          unit_price: item.price,
+          unit_price: portionPrice(
+            item.price.toString(),
+            i.customizations.size,
+          ),
         },
       });
       docs.push({

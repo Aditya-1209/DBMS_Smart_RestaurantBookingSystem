@@ -10,6 +10,7 @@ import { Review } from "../models/Review";
 import { CustomerPreference } from "../models/CustomerPreference";
 import { OrderCustomization } from "../models/OrderCustomization";
 import { reconcile } from "../lib/services/orders";
+import { portionPrice } from "../lib/pricing";
 const base = process.env.APP_ORIGIN || "http://127.0.0.1:3000";
 const credentials = JSON.parse(
   readFileSync(".data/demo-credentials.json", "utf8"),
@@ -50,8 +51,6 @@ async function login(as: string, email: string) {
 }
 const custom = {
   size: "Regular",
-  crust: "Classic",
-  extra_cheese: false,
   remove: [],
   add: [],
   special_instruction: "Integration test: mild spice.",
@@ -709,6 +708,50 @@ test(
         );
       },
     );
+    await t.test("portion pricing rounds to the nearest paise", () => {
+      assert.equal(portionPrice("220.00", "Regular"), 220);
+      assert.equal(portionPrice("220.00", "Large"), 330);
+      assert.equal(portionPrice("19.99", "Large"), 29.99);
+      assert.equal(portionPrice("0.01", "Large"), 0.02);
+      assert.equal(portionPrice("0.00", "Large"), 0);
+    });
+    await t.test(
+      "retired options, invalid portions and client unit prices are rejected",
+      async () => {
+        const item = await prisma.menuItem.findFirstOrThrow({
+          where: { availability: true },
+        });
+        for (const extra of [
+          { extra_cheese: true },
+          { crust: "Thin" },
+          { size: "Huge" },
+        ]) {
+          const r = await request("orders", "POST", {
+            idempotency_key: randomUUID(),
+            items: [
+              {
+                item_id: item.item_id,
+                quantity: 1,
+                customizations: { ...custom, ...extra },
+              },
+            ],
+          });
+          assert.equal(r.status, 400, JSON.stringify(r.data));
+        }
+        const r = await request("orders", "POST", {
+          idempotency_key: randomUUID(),
+          items: [
+            {
+              item_id: item.item_id,
+              quantity: 1,
+              unit_price: 1,
+              customizations: { ...custom, size: "Large" },
+            },
+          ],
+        });
+        assert.equal(r.status, 400, JSON.stringify(r.data));
+      },
+    );
     await t.test(
       "order placement supports separately customized duplicate dishes",
       async () => {
@@ -725,8 +768,8 @@ test(
               quantity: 1,
               customizations: {
                 ...custom,
-                extra_cheese: true,
-                special_instruction: "Extra cheese",
+                size: "Large",
+                special_instruction: "Large portion, mild spice.",
               },
             },
           ],
@@ -735,7 +778,7 @@ test(
         assert.equal(r.status, 200, JSON.stringify(r.data));
         orderId = r.data.order_id;
         assert.equal(r.data.items.length, 2);
-        assert.equal(Number(r.data.total_amount), 660);
+        assert.equal(Number(r.data.total_amount), 770);
         const retry = await request("orders", "POST", body);
         assert.equal(retry.data.order_id, orderId);
         assert.equal(
@@ -744,6 +787,14 @@ test(
         );
         const docs = await OrderCustomization.find({ order_id: orderId });
         assert.equal(docs.length, 2);
+        const sizes = docs.map((d) => d.customizations?.size).sort();
+        assert.deepEqual(sizes, ["Large", "Regular"]);
+        assert.deepEqual(
+          r.data.items
+            .map((line: { unit_price: string }) => Number(line.unit_price))
+            .sort((a: number, b: number) => a - b),
+          [220, 330],
+        );
         assert.notEqual(docs[0].order_item_id, docs[1].order_item_id);
       },
     );
@@ -887,7 +938,7 @@ test(
         });
         assert.equal(
           Number(after._sum.amount) - Number(before._sum.amount),
-          660,
+          770,
         );
         assert.equal(
           (

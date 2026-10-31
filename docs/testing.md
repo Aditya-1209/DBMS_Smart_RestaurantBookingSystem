@@ -24,7 +24,7 @@ Tests execute against the actual local Next.js server, PostgreSQL 17 and authent
 | Runtime assets work with non-loopback requests blocked | First browser test; zero external browser requests |
 | ESLint, TypeScript, production build, dependency audit | quality-checks.log; production-build.log |
 
-The Node runner reports **27 passed**: 26 scenario subtests plus the parent suite test. Playwright runs **7 browser scenarios**. Separate native outage/recovery and database restart tests check behavior that mocked tests cannot establish.
+The Node runner reports **29 passed**: 28 scenario subtests plus the parent suite test. Playwright runs **8 browser scenarios**. Separate native outage/recovery and database restart tests check behavior that mocked tests cannot establish.
 
 The final production server is also restarted independently from development; a production health check and stored sample bill verify the same persistent data. See final-verification.log for process and HTTP evidence.
 
@@ -36,6 +36,8 @@ The final production server is also restarted independently from development; a 
 4. Sign in as chef, waiter and cashier to prepare → ready → served → completed, with instructions visible.
 5. Manager views SQL reports, creates/edits/deletes a category and opens payment records.
 6. Mobile 390×844 viewport: no horizontal overflow, usable menu and modal basket.
+7. One-click staff assignment, automatic customer dine-in eligibility and table release.
+8. Regular/Large price switching, quantity totals, retired saved basket cleanup, mixed portions and payment.
 
 Desktop (1440px), mobile, reservation, bill/review, kitchen and manager screenshots are retained. They may include disposable browser-test records captured before cleanup; current data is read from the databases.
 
@@ -60,3 +62,7 @@ The added integration scenario books 23:30–01:00, rejects a conflicting reserv
 ## One-click assignment verification
 
 The added integration scenario checks customer/chef authorization, occupied-table rejection without partial check-in, concurrent idempotent assignment, owner-only dine-in eligibility and orders, active-order completion protection, release after completion, and rejection of future/closed bookings. A browser test opens a customer's basket before staff assignment, clicks Assign table once from the staff reservation page, verifies exactly one request and automatic customer dine-in visibility, then completes the reservation and verifies release. Screenshots: staff-assign-table.png and customer-assigned-table.png.
+
+## Portion pricing verification
+
+Regular menu prices remain unchanged. Large portions cost 50% more, rounded per unit to the nearest paise. Integration tests check rounding, strict rejection of retired options and client prices, separately priced duplicate dishes (2 × ₹220 + ₹330 = ₹770), stored MongoDB sizes, and payment totals. The browser test switches both directions between sizes, checks quantity totals and saved basket migration, and pays a mixed ₹550 bill. Screenshot: large-portion.png.

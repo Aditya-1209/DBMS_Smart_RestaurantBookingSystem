@@ -259,8 +259,6 @@ async function main() {
           item_id: m.item_id,
           customizations: {
             size: "Regular",
-            crust: "Classic",
-            extra_cheese: false,
             remove: [],
             add: [],
             special_instruction: i === 1 ? "Mild spice, please." : "",

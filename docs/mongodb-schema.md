@@ -18,9 +18,9 @@ The API validates SQL order ownership and completed payment before submission/ed
 - order_id: required SQL order identifier, indexed.
 - order_item_id: required SQL line identifier, unique.
 - item_id: required SQL menu identifier.
-- customizations: `{size, crust, extra_cheese, remove[], add[], special_instruction}`.
+- customizations: `{size, remove[], add[], special_instruction}`.
 
-The server validates bounded arrays and instruction length (500 characters), obtains IDs from newly created SQL lines, and writes a durable SQL outbox in the order transaction. No customer-provided order_item_id is accepted. Kitchen details join MongoDB documents to SQL lines by order_item_id. The SQL outbox provides fallback instructions during an outage; upserts make retries idempotent. These requests have no price surcharge in this educational project; prices remain SQL facts.
+The server validates bounded arrays and instruction length (500 characters), obtains IDs from newly created SQL lines, and writes a durable SQL outbox in the order transaction. No customer-provided order_item_id is accepted. Kitchen details join MongoDB documents to SQL lines by order_item_id. The SQL outbox provides fallback instructions during an outage; upserts make retries idempotent. Size is Regular or Large. Large costs 50% more than the SQL menu price, rounded to the nearest paise, and is captured in SQL order_item.unit_price at checkout. Other kitchen notes have no surcharge. Extra cheese and crust options are no longer offered; older order totals remain unchanged.
 
 ## customer_preferences
 

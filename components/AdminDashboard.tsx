@@ -1,5 +1,6 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
+import { portionPrice } from "../lib/pricing";
 import { useState, useEffect, useCallback } from "react";
 import {
   BarChart3,
@@ -414,7 +415,7 @@ export default function AdminDashboard({
                   <tr>
                     <th>Dish</th>
                     <th>Category</th>
-                    <th>Price</th>
+                    <th>Regular price</th>
                     <th>Availability</th>
                     <th>Actions</th>
                   </tr>
@@ -678,7 +679,7 @@ export default function AdminDashboard({
                 item_name: "Dish name",
                 description: "Description",
                 category_id: "Category",
-                price: "Price (INR)",
+                price: "Regular price (INR)",
                 availability: "Available to order",
                 vegetarian: "Vegetarian",
                 image: "Dish image",
@@ -801,6 +802,12 @@ export default function AdminDashboard({
                         })
                       }
                     />
+                  )}
+                  {key === "price" && (
+                    <small className="muted">
+                      Large: {money(portionPrice(Number(value) || 0, "Large"))}{" "}
+                      (+50%)
+                    </small>
                   )}
                 </label>
               );

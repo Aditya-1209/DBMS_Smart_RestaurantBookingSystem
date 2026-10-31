@@ -15,8 +15,6 @@ export const password = z
 export const customization = z
   .object({
     size: z.enum(["Regular", "Large"]).default("Regular"),
-    crust: z.enum(["Classic", "Thin"]).default("Classic"),
-    extra_cheese: z.boolean().default(false),
     remove: z.array(text(50)).max(10).default([]),
     add: z.array(text(50)).max(10).default([]),
     special_instruction: z.string().trim().max(500).default(""),
@@ -28,11 +26,13 @@ export const orderInput = z
     idempotency_key: z.string().uuid(),
     items: z
       .array(
-        z.object({
-          item_id: id,
-          quantity: z.number().int().min(1).max(99),
-          customizations: customization,
-        }),
+        z
+          .object({
+            item_id: id,
+            quantity: z.number().int().min(1).max(99),
+            customizations: customization,
+          })
+          .strict(),
       )
       .min(1)
       .max(30),

@@ -159,6 +159,70 @@ test("customer registration, submitted ₹880 order, simulated payment and revie
   });
 });
 
+test("portion price updates, retired basket options migrate, and Large is billed correctly", async ({
+  page,
+}) => {
+  await login(page, email);
+  await page.goto("/menu");
+  await page
+    .getByRole("button", { name: "Add Paneer Tikka", exact: true })
+    .click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByLabel("Preparation")).toHaveCount(0);
+  await expect(dialog.getByLabel(/Extra cheese/)).toHaveCount(0);
+  await expect(dialog.locator(".row.between b")).toHaveText("₹220");
+  await dialog.getByLabel("Size", { exact: true }).selectOption("Large");
+  await expect(dialog.locator(".row.between b")).toHaveText("₹330");
+  await dialog.getByLabel("Size", { exact: true }).selectOption("Regular");
+  await expect(dialog.locator(".row.between b")).toHaveText("₹220");
+  await dialog.getByLabel("Size", { exact: true }).selectOption("Large");
+  await page.screenshot({
+    path: "docs/screenshots/large-portion.png",
+    fullPage: true,
+  });
+  await dialog
+    .getByRole("button", { name: "Add to basket", exact: true })
+    .click();
+  const basket = page.locator("aside.cart-panel");
+  await expect(basket.locator(".grand")).toContainText("₹330");
+  await basket
+    .getByRole("button", { name: "Add one Paneer Tikka", exact: true })
+    .click();
+  await expect(basket.locator(".grand")).toContainText("₹660");
+  await basket
+    .getByRole("button", { name: "Remove one Paneer Tikka", exact: true })
+    .click();
+  await add(page, "Paneer Tikka");
+  await expect(basket.locator(".grand")).toContainText("₹550");
+  // Simulate a basket from an older app version, including the retired controls.
+  await page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem("saffron-cart")!);
+    for (const line of saved)
+      Object.assign(line.customizations, { crust: "Thin", extra_cheese: true });
+    localStorage.setItem("saffron-cart", JSON.stringify(saved));
+  });
+  await page.reload();
+  await expect(basket.locator(".grand")).toContainText("₹550");
+  await expect(basket).not.toContainText("Extra cheese");
+  await expect(basket).not.toContainText("crust");
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem("saffron-cart")))
+    .not.toContain("extra_cheese");
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem("saffron-cart")))
+    .not.toContain("crust");
+  await page.getByRole("button", { name: "Place order", exact: true }).click();
+  await expect(page).toHaveURL(/\/orders$/);
+  const card = page
+    .locator(".order-card")
+    .filter({ has: page.locator(".order-card-footer b", { hasText: "₹550" }) });
+  await card.getByRole("button", { name: "View order" }).click();
+  await expect(dialog.locator(".bill-total")).toContainText("₹550");
+  await expect(dialog).toContainText("Large");
+  await dialog.getByRole("button", { name: "Simulate payment · ₹550" }).click();
+  await expect(dialog).toContainText("Paid ₹550 via UPI");
+});
+
 test("customer booking, confirmation and cancellation", async ({ page }) => {
   await login(page, email);
   await page
