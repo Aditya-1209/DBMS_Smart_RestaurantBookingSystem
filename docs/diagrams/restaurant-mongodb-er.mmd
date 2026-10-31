@@ -1,0 +1,39 @@
+erDiagram
+  CUSTOMER ||..o{ REVIEWS : writes
+  ORDERS ||..o| REVIEWS : has_review
+  MENU_ITEM }o..o{ REVIEWS : rated_in_embedded_array
+  CUSTOMER ||..o| CUSTOMER_PREFERENCES : has
+  ORDERS ||..o{ ORDER_CUSTOMIZATIONS : customizes
+  ORDER_ITEM ||..o| ORDER_CUSTOMIZATIONS : has
+  MENU_ITEM ||..o{ ORDER_CUSTOMIZATIONS : refers_to
+  REVIEWS {
+    ObjectId _id PK
+    number customer_id "Logical SQL reference"
+    number order_id UK "Logical SQL reference"
+    number rating
+    string comment
+    json items_reviewed
+    number items_reviewed_item_id "Logical SQL reference"
+    number items_reviewed_rating
+    date created_at
+    date updated_at
+  }
+  CUSTOMER_PREFERENCES {
+    ObjectId _id PK
+    number customer_id UK "Logical SQL reference"
+    string[] dietary_preferences
+    string[] preferred_cuisines
+    string spice_level
+    string[] allergens
+  }
+  ORDER_CUSTOMIZATIONS {
+    ObjectId _id PK
+    number order_id "Logical SQL reference"
+    number order_item_id UK "Logical SQL reference"
+    number item_id "Logical SQL reference"
+    json customizations
+    string customizations_size
+    string[] customizations_remove
+    string[] customizations_add
+    string customizations_special_instruction
+  }

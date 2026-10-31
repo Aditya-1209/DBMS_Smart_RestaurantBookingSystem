@@ -1,0 +1,88 @@
+erDiagram
+  CUSTOMER ||--o{ RESERVATION : books
+  RESTAURANT_TABLE ||--o{ RESERVATION : receives
+  CUSTOMER ||--o{ ORDERS : places
+  RESTAURANT_TABLE o|--o{ ORDERS : seats
+  STAFF o|--o{ ORDERS : handles
+  CATEGORY ||--o{ MENU_ITEM : classifies
+  ORDERS ||--o{ ORDER_ITEM : contains
+  MENU_ITEM ||--o{ ORDER_ITEM : appears_in
+  ORDERS ||--o| PAYMENT : has
+  CUSTOMER {
+    integer customer_id PK
+    string name
+    string email UK
+    string phone UK
+    string password
+    timestamp created_at
+  }
+  STAFF {
+    integer staff_id PK
+    string name
+    string email UK
+    string phone UK
+    string role
+    string password
+    boolean active
+  }
+  RESTAURANT_TABLE {
+    integer table_id PK
+    integer table_number UK
+    integer capacity
+    string status
+  }
+  CATEGORY {
+    integer category_id PK
+    string category_name UK
+  }
+  MENU_ITEM {
+    integer item_id PK
+    integer category_id FK
+    string item_name
+    text description "nullable"
+    decimal price
+    boolean availability
+    text image
+    boolean vegetarian
+  }
+  RESERVATION {
+    integer reservation_id PK
+    integer customer_id FK
+    integer table_id FK
+    date reservation_date
+    time(6) reservation_time
+    timestamp checked_in_at "nullable"
+    integer duration_minutes
+    timestamp starts_at "generated"
+    timestamp ends_at "generated"
+    integer guest_count
+    string status
+  }
+  ORDERS {
+    integer order_id PK
+    integer customer_id FK
+    integer table_id FK "nullable"
+    integer staff_id FK "nullable"
+    date order_date
+    time(6) order_time
+    string status
+    decimal total_amount
+    string idempotency_key UK "nullable"
+  }
+  ORDER_ITEM {
+    integer order_item_id PK
+    integer order_id FK
+    integer item_id FK
+    integer quantity
+    decimal unit_price
+    decimal subtotal "generated"
+    string status
+  }
+  PAYMENT {
+    integer payment_id PK
+    integer order_id FK,UK
+    decimal amount
+    string payment_method
+    string payment_status
+    timestamp payment_time
+  }

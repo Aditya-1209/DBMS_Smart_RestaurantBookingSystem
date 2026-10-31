@@ -1,112 +1,67 @@
-# Final ER diagram
+# Restaurant management — entity–relationship schema
 
-Core relationships from the submission are unchanged. Order_Item now has a surrogate line key so multiple customized versions of a dish can belong to the same order.
+The diagrams describe the current implementation: **9 core PostgreSQL tables, 3 support tables, and 3 MongoDB collections**. PostgreSQL attributes are generated from `prisma/schema.prisma`, with foreign keys checked against the SQL migrations. MongoDB fields match the Mongoose models. Migration bookkeeping is omitted.
 
-```mermaid
-erDiagram
-  CUSTOMER ||--o{ RESERVATION : books
-  RESTAURANT_TABLE ||--o{ RESERVATION : receives
-  CUSTOMER ||--o{ ORDERS : places
-  RESTAURANT_TABLE o|--o{ ORDERS : seats
-  STAFF o|--o{ ORDERS : handles
-  CATEGORY ||--o{ MENU_ITEM : classifies
-  ORDERS ||--|{ ORDER_ITEM : contains
-  MENU_ITEM ||--o{ ORDER_ITEM : appears_in
-  ORDERS ||--o| PAYMENT : settles
-  CUSTOMER {
-    int customer_id PK
-    string email UK
-    string phone UK
-    string password "scrypt hash"
-  }
-  STAFF {
-    int staff_id PK
-    string email UK
-    string phone UK
-    string role
-    string password "scrypt hash"
-    boolean active
-  }
-  RESTAURANT_TABLE {
-    int table_id PK
-    int table_number UK
-    int capacity
-    string status
-  }
-  CATEGORY {
-    int category_id PK
-    string category_name UK
-  }
-  MENU_ITEM {
-    int item_id PK
-    int category_id FK
-    decimal price
-    boolean availability
-  }
-  RESERVATION {
-    int reservation_id PK
-    int customer_id FK
-    int table_id FK
-    date reservation_date
-    time reservation_time
-    int duration_minutes
-    timestamp checked_in_at "nullable staff check-in"
-    timestamp starts_at "generated"
-    timestamp ends_at "generated"
-  }
-  ORDERS {
-    int order_id PK
-    int customer_id FK
-    int table_id FK "nullable"
-    int staff_id FK "nullable"
-    string idempotency_key UK "nullable"
-    decimal total_amount "trigger maintained"
-  }
-  ORDER_ITEM {
-    int order_item_id PK
-    int order_id FK
-    int item_id FK
-    int quantity
-    decimal unit_price
-    decimal subtotal "generated"
-    string status
-  }
-  PAYMENT {
-    int payment_id PK
-    int order_id FK,UK
-    decimal amount
-    string payment_method
-    string payment_status
-  }
+## 1. Core PostgreSQL schema
+
+![Core PostgreSQL entity–relationship schema](diagrams/restaurant-core-er.png)
+
+[Scalable SVG](diagrams/restaurant-core-er.svg) · [PNG image](diagrams/restaurant-core-er.png) · [Editable Mermaid](diagrams/restaurant-core-er.mmd)
+
+| Parent | Child | Relationship |
+| --- | --- | --- |
+| Customer | Reservation | One customer → zero or many reservations; each reservation has one customer. |
+| Restaurant_Table | Reservation | One table → zero or many reservations over time; each reservation has one table. |
+| Customer | Orders | One customer → zero or many orders; each order has one customer. |
+| Restaurant_Table | Orders | One table → zero or many orders; each order has zero or one table (takeaway has none). |
+| Staff | Orders | One staff member → zero or many assigned orders; each order has zero or one assigned staff member. |
+| Category | Menu_Item | One category → zero or many dishes; each dish belongs to one category. |
+| Orders | Order_Item | One order → zero or many rows at SQL level; each line belongs to one order. Checkout requires at least one line. |
+| Menu_Item | Order_Item | One dish → zero or many order lines; each line refers to one dish. |
+| Orders | Payment | One order → zero or one payment; each payment belongs to one order. |
+
+`Order_Item` resolves the many-to-many relationship between orders and dishes. Its surrogate primary key permits multiple independently customized lines for the same dish in the same order. `Payment.order_id` is both a foreign key and unique, enforcing at most one payment per order.
+
+## 2. PostgreSQL support schema
+
+![PostgreSQL support entity–relationship schema](diagrams/restaurant-support-er.png)
+
+[Scalable SVG](diagrams/restaurant-support-er.svg) · [PNG image](diagrams/restaurant-support-er.png) · [Editable Mermaid](diagrams/restaurant-support-er.mmd)
+
+- A customer or staff member can have zero or many sessions. Each session belongs to exactly one customer **or** one staff member, enforced by a SQL CHECK constraint.
+- An order has zero or one outbox row, enforced by the unique foreign key `outbox.order_id`. The outbox holds kitchen instructions until MongoDB synchronization succeeds.
+- Login_Attempt is independent. Its primary key is a hashed login identity, not a foreign key to Customer or Staff.
+- Grey boxes repeat core primary keys for context; they are not additional tables.
+
+## 3. MongoDB document schema and SQL references
+
+![MongoDB collections and logical PostgreSQL references](diagrams/restaurant-mongodb-er.png)
+
+[Scalable SVG](diagrams/restaurant-mongodb-er.svg) · [PNG image](diagrams/restaurant-mongodb-er.png) · [Editable Mermaid](diagrams/restaurant-mongodb-er.mmd)
+
+Dashed connectors represent application-validated references across database engines. They are **not SQL foreign keys**. Each collection also has MongoDB's `_id` primary identifier. Nested rows are embedded fields, not extra collections; automatic Mongoose version metadata is omitted.
+
+- **Reviews:** a customer can write many reviews; an order can have at most one review because `order_id` has a unique index. A review may rate multiple dishes through `items_reviewed[]`, and a dish may appear in multiple reviews. Each array element contains an `item_id` reference and a rating. Review writes require ownership, completed payment, and dishes belonging to that order.
+- **Customer_Preferences:** a customer can have zero or one preferences document, enforced by a unique `customer_id` index.
+- **Order_Customizations:** an order can have multiple customization documents, one per order line. `order_item_id` is unique. Each document also references its order and menu item. A document may be temporarily absent while the SQL outbox is pending.
+- `customizations` contains `size`, `remove[]`, `add[]`, and `special_instruction`. Extra-cheese and crust fields are no longer offered.
+
+## Notation and derived values
+
+- **PK:** primary key. **FK:** SQL foreign key. **UQ:** unique constraint/index. **REF:** logical cross-database reference.
+- **?** means nullable; other SQL attributes are required. MongoDB requiredness is defined by its Mongoose schema and API validation.
+- Crow's-foot endpoints: a bar means one, a circle means zero, and a fork means many. Combinations express exactly one, zero or one, and zero or many.
+- **\*** marks a generated SQL column: `subtotal = quantity × unit_price`, and reservation boundaries derive from date, time, and duration.
+- `Orders.total_amount` is maintained by the order-total trigger. Regular prices come from Menu_Item; Large portions cost 50% more, rounded to paise, and the charged unit price is stored in Order_Item.
+- Confirmed reservation ranges cannot overlap for the same table. Adjacent time slots are permitted. `checked_in_at` records staff assignment.
+- `Orders.staff_id` is an optional stored association; staff authorization comes from the authenticated role, not from this association.
+
+## Regenerate
+
+Run from the project root with Node 24 and installed dependencies:
+
+```sh
+node scripts/render-er-diagrams.mjs
 ```
 
-An order has one or more lines at the service-transaction boundary. SQL allows a temporary empty parent while the transaction inserts its lines; payment rejects an empty bill. At most one payment record exists for an order.
-
-Support relationships:
-
-```mermaid
-erDiagram
-  CUSTOMER o|--o{ SESSION : authenticates
-  STAFF o|--o{ SESSION : authenticates
-  ORDERS ||--o| OUTBOX : queues_instructions
-  SESSION {
-    string token_hash PK
-    int customer_id FK "exactly one principal"
-    int staff_id FK "exactly one principal"
-    timestamp expires_at
-  }
-  OUTBOX {
-    int id PK
-    int order_id FK,UK
-    json payload
-    timestamp processed_at
-    int attempts
-  }
-  LOGIN_ATTEMPT {
-    string key PK
-    int count
-    timestamp window_start
-  }
-```
-
-MongoDB uses validated logical references: reviews.customer_id/order_id and items_reviewed.item_id; order_customizations.order_id/order_item_id/item_id; customer_preferences.customer_id. They are not SQL foreign keys. The original graphical submission is preserved in reference/original-submission.pdf and reference/er-03.png.
+This rebuilds the SVG, PNG, and Mermaid sources in `docs/diagrams/`. The original submission remains preserved in `docs/reference/`.

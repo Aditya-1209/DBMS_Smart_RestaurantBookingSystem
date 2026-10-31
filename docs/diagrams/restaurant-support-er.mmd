@@ -1,0 +1,23 @@
+erDiagram
+  CUSTOMER o|--o{ SESSION : authenticates
+  STAFF o|--o{ SESSION : authenticates
+  ORDERS ||--o| OUTBOX : queues_instructions
+  SESSION {
+    text token_hash PK
+    integer customer_id FK "nullable"
+    integer staff_id FK "nullable"
+    timestamp expires_at
+  }
+  OUTBOX {
+    integer id PK
+    integer order_id FK,UK
+    jsonb payload
+    timestamp processed_at "nullable"
+    integer attempts
+    timestamp created_at
+  }
+  LOGIN_ATTEMPT {
+    text key PK
+    integer count
+    timestamp window_start
+  }
