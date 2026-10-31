@@ -1,0 +1,341 @@
+{
+  "notation": "Chen with min-max participation",
+  "entities": [
+    {
+      "model": "Customer",
+      "center": [
+        550,
+        470
+      ],
+      "fields": [
+        {
+          "name": "customer_id",
+          "key": true,
+          "derived": false
+        },
+        {
+          "name": "name",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "email",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "phone",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "password",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "created_at",
+          "key": false,
+          "derived": false
+        }
+      ]
+    },
+    {
+      "model": "Category",
+      "center": [
+        1650,
+        470
+      ],
+      "fields": [
+        {
+          "name": "category_id",
+          "key": true,
+          "derived": false
+        },
+        {
+          "name": "category_name",
+          "key": false,
+          "derived": false
+        }
+      ]
+    },
+    {
+      "model": "MenuItem",
+      "center": [
+        2750,
+        470
+      ],
+      "fields": [
+        {
+          "name": "item_id",
+          "key": true,
+          "derived": false
+        },
+        {
+          "name": "item_name",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "description",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "price",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "availability",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "image",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "vegetarian",
+          "key": false,
+          "derived": false
+        }
+      ]
+    },
+    {
+      "model": "Reservation",
+      "center": [
+        550,
+        1370
+      ],
+      "fields": [
+        {
+          "name": "reservation_id",
+          "key": true,
+          "derived": false
+        },
+        {
+          "name": "reservation_date",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "reservation_time",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "checked_in_at",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "duration_minutes",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "starts_at",
+          "key": false,
+          "derived": true
+        },
+        {
+          "name": "ends_at",
+          "key": false,
+          "derived": true
+        },
+        {
+          "name": "guest_count",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "status",
+          "key": false,
+          "derived": false
+        }
+      ]
+    },
+    {
+      "model": "Orders",
+      "center": [
+        1650,
+        1370
+      ],
+      "fields": [
+        {
+          "name": "order_id",
+          "key": true,
+          "derived": false
+        },
+        {
+          "name": "order_date",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "order_time",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "status",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "total_amount",
+          "key": false,
+          "derived": true
+        },
+        {
+          "name": "idempotency_key",
+          "key": false,
+          "derived": false
+        }
+      ]
+    },
+    {
+      "model": "OrderItem",
+      "center": [
+        2750,
+        1370
+      ],
+      "fields": [
+        {
+          "name": "order_item_id",
+          "key": true,
+          "derived": false
+        },
+        {
+          "name": "quantity",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "unit_price",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "subtotal",
+          "key": false,
+          "derived": true
+        },
+        {
+          "name": "status",
+          "key": false,
+          "derived": false
+        }
+      ]
+    },
+    {
+      "model": "RestaurantTable",
+      "center": [
+        550,
+        2270
+      ],
+      "fields": [
+        {
+          "name": "table_id",
+          "key": true,
+          "derived": false
+        },
+        {
+          "name": "table_number",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "capacity",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "status",
+          "key": false,
+          "derived": false
+        }
+      ]
+    },
+    {
+      "model": "Staff",
+      "center": [
+        1650,
+        2270
+      ],
+      "fields": [
+        {
+          "name": "staff_id",
+          "key": true,
+          "derived": false
+        },
+        {
+          "name": "name",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "email",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "phone",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "role",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "password",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "active",
+          "key": false,
+          "derived": false
+        }
+      ]
+    },
+    {
+      "model": "Payment",
+      "center": [
+        2750,
+        2270
+      ],
+      "fields": [
+        {
+          "name": "payment_id",
+          "key": true,
+          "derived": false
+        },
+        {
+          "name": "amount",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "payment_method",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "payment_status",
+          "key": false,
+          "derived": false
+        },
+        {
+          "name": "payment_time",
+          "key": false,
+          "derived": false
+        }
+      ]
+    }
+  ]
+}

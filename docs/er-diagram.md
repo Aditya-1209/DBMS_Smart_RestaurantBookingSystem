@@ -2,7 +2,21 @@
 
 The diagrams describe the current implementation: **9 core PostgreSQL tables, 3 support tables, and 3 MongoDB collections**. PostgreSQL attributes are generated from `prisma/schema.prisma`, with foreign keys checked against the SQL migrations. MongoDB fields match the Mongoose models. Migration bookkeeping is omitted.
 
-## 1. Core PostgreSQL schema
+## Standard ER diagram — Chen notation
+
+![Standard Chen ER diagram](diagrams/restaurant-standard-chen-er.png)
+
+[Scalable SVG](diagrams/restaurant-standard-chen-er.svg) · [High-resolution PNG](diagrams/restaurant-standard-chen-er.png) · [Editable generator](../scripts/render-chen-er.mjs) · [Entity/attribute data](diagrams/restaurant-standard-chen-er.json)
+
+This standard conceptual diagram shows the **nine main entities**, **nine relationships**, and **51 attributes**. Rectangles are entities, diamonds are relationships, and ovals are attributes. Primary keys are underlined. Derived attributes use dashed ovals: line subtotal, order total, and reservation boundaries. These derived values are physically stored/generated or maintained by a trigger in the implementation.
+
+Labels use **(minimum, maximum) participation per entity instance**. For example, Customer (0,N) — PLACES — Order (1,1) means a customer can place zero or many orders, while each order belongs to exactly one customer. Optional table and staff assignments use (0,1) on the Order side; an order may have zero or one payment. The conceptual Order–Order_Item relationship requires at least one line at checkout; SQL permits a temporary empty parent during construction.
+
+Foreign keys are represented by relationship connectors rather than repeated as conceptual attributes. Order_Item has its own primary key, so it is drawn as a regular entity, not a weak entity. `ORDER` and `RESTAURANT TABLE` are conceptual labels for the physical `orders` and `restaurant_table` tables. Password attributes hold scrypt hashes. Optional attributes and alternate unique constraints are detailed in the physical schema below.
+
+Application support tables and MongoDB collections remain in the separate diagrams below so the main academic ER diagram stays readable.
+
+## 1. Core PostgreSQL schema — physical crow’s-foot notation
 
 ![Core PostgreSQL entity–relationship schema](diagrams/restaurant-core-er.png)
 
@@ -62,6 +76,7 @@ Run from the project root with Node 24 and installed dependencies:
 
 ```sh
 node scripts/render-er-diagrams.mjs
+node scripts/render-chen-er.mjs
 ```
 
-This rebuilds the SVG, PNG, and Mermaid sources in `docs/diagrams/`. The original submission remains preserved in `docs/reference/`.
+The first command rebuilds the physical SVG, PNG, and Mermaid diagrams. The second rebuilds the standard Chen SVG/PNG and its entity/attribute JSON in `docs/diagrams/`. The original submission remains preserved in `docs/reference/`.

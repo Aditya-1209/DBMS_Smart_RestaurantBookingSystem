@@ -156,9 +156,9 @@ Do not run stateful suites concurrently. Tests use clearly marked temporary reco
 
 ## Documentation
 
-![Restaurant management ER schema](docs/diagrams/restaurant-core-er.png)
+![Standard restaurant ER diagram — Chen notation](docs/diagrams/restaurant-standard-chen-er.png)
 
-[Complete ER diagrams and relationship guide](docs/er-diagram.md) · [Scalable core diagram](docs/diagrams/restaurant-core-er.svg) · [Support schema](docs/diagrams/restaurant-support-er.png) · [MongoDB schema](docs/diagrams/restaurant-mongodb-er.png)
+[Complete ER diagrams and relationship guide](docs/er-diagram.md) · [Standard Chen diagram](docs/diagrams/restaurant-standard-chen-er.svg) · [Physical core schema](docs/diagrams/restaurant-core-er.svg) · [Support schema](docs/diagrams/restaurant-support-er.png) · [MongoDB schema](docs/diagrams/restaurant-mongodb-er.png)
 
 - `docs/environment-setup.md`: detected tools, native installation, connectivity and process ownership.
 - `docs/architecture.md`: request flow, SQL/NoSQL responsibilities, durable outbox, authentication.
