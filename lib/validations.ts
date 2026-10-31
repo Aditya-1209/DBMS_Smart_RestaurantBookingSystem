@@ -54,9 +54,6 @@ export function bookingDates(date: string, time: string, duration: number) {
   const start = new Date(`${date}T${time}:00+05:30`);
   if (Number.isNaN(start.valueOf()) || start <= new Date())
     throw Error("Choose a valid future date and time.");
-  const clock = Number(time.slice(0, 2)) * 60 + Number(time.slice(3));
-  if (clock < 11 * 60 || clock + duration > 23 * 60)
-    throw Error("Reservations must fit between 11:00 and 23:00 IST.");
   return { start, end: new Date(start.valueOf() + duration * 60000) };
 }
 export const menuInput = z

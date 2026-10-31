@@ -20,7 +20,8 @@
     "test": "node --import tsx --test tests/integration.test.ts",
     "test:e2e": "node --env-file=.env node_modules/@playwright/test/cli.js test",
     "postinstall": "prisma generate",
-    "test:recovery": "node --import tsx tests/failure-recovery.ts"
+    "test:recovery": "node --import tsx tests/failure-recovery.ts",
+    "demo:reset-logins": "node --import tsx scripts/reset-demo-logins.ts"
   },
   "dependencies": {
     "@prisma/client": "6.19.0",

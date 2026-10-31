@@ -21,3 +21,9 @@ npm start
 ```
 
 Use npm run dev instead of npm start for development. Stop the app with Ctrl+C and the project-owned databases with npm run db:stop. Credentials are generated in .data/demo-credentials.json and are not included in source control or the ZIP.
+
+## Updated restaurant demo
+
+Restaurant hours are now 24/7, including cross-midnight reservations. Local application accounts use numbered addresses (`customer1@gmail.com`, `admin1@gmail.com`, `chef1@gmail.com`, `waiter1@gmail.com`, `cashier1@gmail.com`) and the requested public demo password `password@123`. Account IDs, role assignments and historical records are preserved. The README remains free of device-specific paths and account details.
+
+Five mismatched dish images were replaced with real dish-specific local photos. The updated production build passed lint, TypeScript, 25 integration scenarios (26 Node passes including the parent), and all six browser scenarios. The new integration test verifies midnight availability and cross-date overlap protection; the reservation browser scenario books 00:30. Updated screenshots and execution logs are included.

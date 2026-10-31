@@ -693,7 +693,7 @@ export default function RestaurantApp({ view }: { view: string }) {
         <p>Gather around. There’s always room for one more.</p>
         <span>
           <Clock size={14} />
-          Open daily · 11 AM – 11 PM IST
+          Open 24/7 · Every day
         </span>
         <small>PES University · Smart Restaurant Management System</small>
       </footer>
@@ -973,8 +973,10 @@ function AuthForm({
           </Link>
         </p>
         <p className="fine-print">
-          University demo accounts are generated during setup. Find their local
-          credentials in <code>.data/demo-credentials.json</code>.
+          Demo guest: <code>customer1@gmail.com</code> · Manager:{" "}
+          <code>admin1@gmail.com</code>.<br />
+          All demo accounts use <code>password@123</code>. Choose Restaurant
+          team for staff or managers.
         </p>
       </div>
     </section>

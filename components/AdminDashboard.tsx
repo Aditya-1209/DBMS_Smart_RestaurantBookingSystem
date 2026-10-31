@@ -720,6 +720,11 @@ export default function AdminDashboard({
                             "dessert",
                             "drink",
                             "chai",
+                            "palak-paneer",
+                            "dal-makhani",
+                            "mango-kulfi",
+                            "tandoori-mushroom",
+                            "veg-biryani",
                           ].map((x) => ({
                             value: `/images/${x}.jpg`,
                             label: x,

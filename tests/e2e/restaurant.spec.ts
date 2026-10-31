@@ -165,7 +165,7 @@ test("customer booking, confirmation and cancellation", async ({ page }) => {
     .getByRole("link", { name: "Reserve a table", exact: true })
     .click();
   await page.getByLabel("Date", { exact: true }).fill("2036-07-20");
-  await page.getByLabel("Arrival time").fill("19:00");
+  await page.getByLabel("Arrival time").fill("00:30");
   await page
     .getByRole("button", { name: "Find available tables", exact: true })
     .click();

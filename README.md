@@ -45,15 +45,22 @@ npm start
 
 ## Demo accounts
 
-Setup generates local demo credentials in **`.data/demo-credentials.json`**. Use the actual email addresses and password from that file to sign in. The identifiers below are illustrative placeholders, not login credentials. The generated credential file is ignored by Git and should not be shared. New customers can register in the UI.
+The restaurant accepts orders and reservations **24 hours a day, 7 days a week**, including bookings crossing midnight. Booking dates and times use IST.
 
-| Account | Email placeholder | Sign-in tab | Permissions |
-| --- | --- | --- | --- |
-| Customer | `<CUSTOMER_EMAIL>` | I'm a guest | Orders, own bills, reservations, reviews, preferences |
-| Manager / administrator | `<MANAGER_EMAIL>` | Restaurant team | All management and reporting |
-| Chef | `<CHEF_EMAIL>` | Restaurant team | Prepare and mark orders ready |
-| Waiter | `<WAITER_EMAIL>` | Restaurant team | Kitchen, serving, reservations and occupancy |
-| Cashier | `<CASHIER_EMAIL>` | Restaurant team | Simulated payment and closing served, paid orders |
+All seeded demo accounts use **`password@123`**. These are public local-demo credentials; passwords are still stored as salted hashes.
+
+| Account | Email | Sign-in tab |
+| --- | --- | --- |
+| Customer | `customer1@gmail.com` | I'm a guest |
+| Customer | `customer2@gmail.com` | I'm a guest |
+| Customer | `customer3@gmail.com` | I'm a guest |
+| Manager / administrator | `admin1@gmail.com` | Restaurant team |
+| Chef | `chef1@gmail.com` | Restaurant team |
+| Waiter | `waiter1@gmail.com` | Restaurant team |
+| Cashier | `cashier1@gmail.com` | Restaurant team |
+
+Additional local accounts can be normalized with `npm run demo:reset-logins`: customers become `customerN@gmail.com`, managers `adminN@gmail.com`, and staff use their role plus a number. The command sets `password@123`, preserves account IDs and restaurant history, and signs out old sessions. The complete local account list is written to `.data/demo-credentials.json`. New registrations continue to use the password chosen by the customer.
+
 
 Passwords are scrypt hashes in PostgreSQL. The submission's plaintext example passwords are never used by the application. Original SQL is historical reference only.
 
@@ -134,12 +141,13 @@ For an existing MongoDB instance, set `MONGO_ADMIN_URL` for setup if administrat
 | `npm run setup:local` | Detect/start project databases, provision credentials, migrate, initialize indexes, seed and verify |
 | `npm run db:start` / `npm run db:stop` | Start/stop only project-owned native database processes |
 | `npm run db:check` | Verify SQL/Mongo connectivity and core counts |
-| `npm run db:seed` | Idempotent sample data; preserves existing rows and passwords |
+| `npm run db:seed` | Idempotent sample data; refreshes seeded demo logins and dish images |
+| `npm run demo:reset-logins` | Normalize local application logins and set the public demo password |
 | `npm run db:reconcile` | Retry pending MongoDB customization writes from the durable SQL outbox |
 | `npm run dev` | Development Next.js server on loopback port 3000 |
 | `npm run build` / `npm start` | Production build and loopback server |
 | `npm run typecheck` / `npm run lint` | TypeScript and ESLint checks |
-| `npm test` | 24 integration scenarios against a running server and both databases |
+| `npm test` | 25 integration scenarios against a running server and both databases |
 | `npm run test:e2e` | 6 browser scenarios and screenshots; first run `npx playwright install chromium` |
 | `npm run test:recovery` | Stops only this checkout's MongoDB to verify durable outbox recovery |
 | `node --import tsx tests/persistence.ts` | Restart only project-owned database services and compare persistent records |

@@ -3,55 +3,56 @@
 > node --import tsx --test tests/integration.test.ts
 
 ▶ Restaurant integration suite against running local services
-  ✔ PostgreSQL connection, migration and all nine core tables (86.44825ms)
-  ✔ MongoDB connection and collection indexes (15.287167ms)
+  ✔ PostgreSQL connection, migration and all nine core tables (171.405083ms)
+  ✔ MongoDB connection and collection indexes (55.039459ms)
 Query 1 [{"item_id":6,"item_name":"Fresh Lime Soda","category_name":"Beverages","price":"80","availability":true},{"item_id":11,"item_name":"Masala Chai","category_name":"Beverages","price":"60","availability":true},{"item_id":5,"item_name":"Gulab Jamun","category_name":"Desserts","price":"100","availability":true},{"item_id":10,"item_name":"Mango Kulfi","category_name":"Desserts","price":"130","availability":true},{"item_id":4,"item_name":"Butter Chicken","category_name":"Main Course","price":"350","availability":true},{"item_id":8,"item_name":"Chicken Biryani","category_name":"Main Course","price":"340","availability":true},{"item_id":12,"item_name":"Dal Makhani","category_name":"Main Course","price":"260","availability":true},{"item_id":7,"item_name":"Palak Paneer","category_name":"Main Course","price":"290","availability":true},{"item_id":3,"item_name":"Veg Biryani","category_name":"Main Course","price":"280","availability":true},{"item_id":2,"item_name":"Chicken 65","category_name":"Starters","price":"250","availability":true},{"item_id":1,"item_name":"Paneer Tikka","category_name":"Starters","price":"220","availability":true},{"item_id":9,"item_name":"Tandoori Mushroom","category_name":"Starters","price":"210","availability":true}]
-Query 2 [{"name":"Rahul Sharma","order_id":1,"order_date":"2026-10-30T00:00:00.000Z","status":"Completed","total_amount":"880"},{"name":"Rahul Sharma","order_id":4,"order_date":"2026-10-30T00:00:00.000Z","status":"Placed","total_amount":"510"},{"name":"Rahul Sharma","order_id":7,"order_date":"2026-10-30T00:00:00.000Z","status":"Completed","total_amount":"450"}]
-Query 3 [{"order_id":1,"item_name":"Paneer Tikka","quantity":2,"unit_price":"220","subtotal":"440"},{"order_id":1,"item_name":"Veg Biryani","quantity":1,"unit_price":"280","subtotal":"280"},{"order_id":1,"item_name":"Fresh Lime Soda","quantity":2,"unit_price":"80","subtotal":"160"}]
-Query 4 [{"item_name":"Fresh Lime Soda","total_quantity_sold":15},{"item_name":"Paneer Tikka","total_quantity_sold":2},{"item_name":"Veg Biryani","total_quantity_sold":2},{"item_name":"Chicken 65","total_quantity_sold":1},{"item_name":"Butter Chicken","total_quantity_sold":1}]
-Query 5 [{"total_revenue":"1830"}]
+Query 2 [{"name":"Rahul Sharma","order_id":22,"order_date":"2026-10-31T00:00:00.000Z","status":"Placed","total_amount":"280"},{"name":"Rahul Sharma","order_id":1,"order_date":"2026-10-30T00:00:00.000Z","status":"Completed","total_amount":"880"},{"name":"Rahul Sharma","order_id":4,"order_date":"2026-10-30T00:00:00.000Z","status":"Placed","total_amount":"510"},{"name":"Rahul Sharma","order_id":7,"order_date":"2026-10-30T00:00:00.000Z","status":"Completed","total_amount":"450"}]
+Query 3 [{"order_id":1,"item_name":"Paneer Tikka","quantity":2,"unit_price":"220","subtotal":"440"},{"order_id":1,"item_name":"Fresh Lime Soda","quantity":2,"unit_price":"80","subtotal":"160"},{"order_id":1,"item_name":"Veg Biryani","quantity":1,"unit_price":"280","subtotal":"280"}]
+Query 4 [{"item_name":"Fresh Lime Soda","total_quantity_sold":15},{"item_name":"Veg Biryani","total_quantity_sold":3},{"item_name":"Paneer Tikka","total_quantity_sold":2},{"item_name":"Chicken 65","total_quantity_sold":1},{"item_name":"Butter Chicken","total_quantity_sold":1}]
+Query 5 [{"total_revenue":"2270"}]
 Query 6 [{"table_id":2,"table_number":2,"capacity":4,"status":"Available"},{"table_id":3,"table_number":3,"capacity":4,"status":"Available"},{"table_id":7,"table_number":7,"capacity":4,"status":"Available"},{"table_id":4,"table_number":4,"capacity":6,"status":"Available"},{"table_id":8,"table_number":8,"capacity":6,"status":"Available"},{"table_id":5,"table_number":5,"capacity":8,"status":"Available"}]
-Query 7 [{"order_id":2,"customer_name":"Ananya Singh","status":"Preparing","order_date":"2026-10-30T00:00:00.000Z","order_time":"1970-01-01T16:50:44.464Z"},{"order_id":4,"customer_name":"Rahul Sharma","status":"Placed","order_date":"2026-10-30T00:00:00.000Z","order_time":"1970-01-01T16:50:44.468Z"}]
-Query 8 [{"payment_method":"UPI","revenue":"1330"},{"payment_method":"Card","revenue":"260"},{"payment_method":"Cash","revenue":"240"}]
-  ✔ all eight submitted SQL queries execute (6.352417ms)
-  ✔ submitted sample bill is exactly ₹880 (6.024334ms)
+Query 7 [{"order_id":2,"customer_name":"Ananya Singh","status":"Preparing","order_date":"2026-10-30T00:00:00.000Z","order_time":"1970-01-01T16:50:44.464Z"},{"order_id":4,"customer_name":"Rahul Sharma","status":"Placed","order_date":"2026-10-30T00:00:00.000Z","order_time":"1970-01-01T16:50:44.468Z"},{"order_id":22,"customer_name":"Rahul Sharma","status":"Placed","order_date":"2026-10-31T00:00:00.000Z","order_time":"1970-01-01T08:33:06.268Z"}]
+Query 8 [{"payment_method":"UPI","revenue":"1770"},{"payment_method":"Card","revenue":"260"},{"payment_method":"Cash","revenue":"240"}]
+  ✔ all eight submitted SQL queries execute (11.209292ms)
+  ✔ submitted sample bill is exactly ₹880 (16.803584ms)
 trg_update_order_total INSERT -> 880
 trg_update_order_total UPDATE -> 1100
 trg_update_order_total DELETE -> 940
-  ✔ order-total trigger INSERT, UPDATE, DELETE and rollback (9.136292ms)
-  ✔ customer, chef, waiter, cashier and administrator authentication (254.907375ms)
-  ✔ server-side authorization and cross-origin protection (6.099584ms)
-  ✔ registration hashes passwords and rejects role injection (29.23625ms)
-  ✔ admin menu and category create, update, delete (13.3705ms)
-  ✔ admin staff CRUD, hashing and deactivate (32.461583ms)
-  ✔ admin table CRUD and real availability (6.321083ms)
+  ✔ order-total trigger INSERT, UPDATE, DELETE and rollback (38.661958ms)
+  ✔ customer, chef, waiter, cashier and administrator authentication (345.943416ms)
+  ✔ server-side authorization and cross-origin protection (18.370834ms)
+  ✔ registration hashes passwords and rejects role injection (40.172625ms)
+  ✔ admin menu and category create, update, delete (32.805167ms)
+  ✔ admin staff CRUD, hashing and deactivate (40.091125ms)
+  ✔ admin table CRUD and real availability (18.230667ms)
 Concurrent bookings: [
-  { status: 200, message: 18 },
+  { status: 200, message: 25 },
   {
     status: 409,
     message: 'This table was just booked for an overlapping time. Choose another table or time.'
   }
 ]
-  ✔ concurrent overlapping reservations permit exactly one booking (16.075959ms)
+  ✔ concurrent overlapping reservations permit exactly one booking (28.417333ms)
 trg_check_reservation_conflict: overlap and oversized party rejected.
-  ✔ reservation DB constraint rejects overlap and enforces capacity (16.799625ms)
-  ✔ adjacent reservations allowed and cancellation frees capacity (12.024292ms)
-  ✔ order placement supports separately customized duplicate dishes (31.342709ms)
-  ✔ client amounts are rejected; another customer cannot access order (7.027125ms)
-  ✔ historical prices remain immutable (1.239833ms)
-  ✔ kitchen state transitions and staff role permissions (16.506875ms)
-  ✔ concurrent payment prevents duplicates and verifies actual bill (8.07025ms)
-  ✔ review create, retrieve, dish average, ownership and edit (26.00925ms)
-  ✔ preferences persist in MongoDB with SQL customer identity (6.493541ms)
-  ✔ outbox retries are idempotent and kitchen instructions retrievable (9.213958ms)
-  ✔ admin reports reconcile with SQL completed payment revenue (24.349584ms)
-  ✔ invalid input and logout invalidate sessions (5.034125ms)
-✔ Restaurant integration suite against running local services (647.923333ms)
-ℹ tests 25
+  ✔ reservation DB constraint rejects overlap and enforces capacity (44.972125ms)
+  ✔ adjacent reservations allowed and cancellation frees capacity (13.148125ms)
+  ✔ 24/7 reservations accept midnight and reject cross-date overlaps (12.511ms)
+  ✔ order placement supports separately customized duplicate dishes (131.691542ms)
+  ✔ client amounts are rejected; another customer cannot access order (7.555ms)
+  ✔ historical prices remain immutable (3.593167ms)
+  ✔ kitchen state transitions and staff role permissions (30.459875ms)
+  ✔ concurrent payment prevents duplicates and verifies actual bill (8.190166ms)
+  ✔ review create, retrieve, dish average, ownership and edit (62.277458ms)
+  ✔ preferences persist in MongoDB with SQL customer identity (8.259375ms)
+  ✔ outbox retries are idempotent and kitchen instructions retrievable (22.799041ms)
+  ✔ admin reports reconcile with SQL completed payment revenue (17.128792ms)
+  ✔ invalid input and logout invalidate sessions (6.40975ms)
+✔ Restaurant integration suite against running local services (1189.683542ms)
+ℹ tests 26
 ℹ suites 0
-ℹ pass 25
+ℹ pass 26
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 1002.097
+ℹ duration_ms 1879.428292

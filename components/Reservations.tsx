@@ -91,7 +91,7 @@ export default function Reservations({ user }: { user: User | null }) {
             <CalendarDays size={23} />
             <div>
               <h2>Let’s make a date</h2>
-              <p>Open daily, 11 AM – 11 PM · India Standard Time</p>
+              <p>Open 24/7 · All reservation times are in IST</p>
             </div>
           </div>
           <form
@@ -119,8 +119,6 @@ export default function Reservations({ user }: { user: User | null }) {
                 <input
                   type="time"
                   value={time}
-                  min="11:00"
-                  max="22:30"
                   onChange={(e) => {
                     setTime(e.target.value);
                     invalidate();

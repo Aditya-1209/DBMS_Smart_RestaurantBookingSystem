@@ -508,6 +508,47 @@ test(
       },
     );
     await t.test(
+      "24/7 reservations accept midnight and reject cross-date overlaps",
+      async () => {
+        const night = await request("reservations", "POST", {
+          table_id: tableId,
+          date: "2037-06-20",
+          time: "23:30",
+          guest_count: 2,
+          duration_minutes: 90,
+        });
+        assert.equal(night.status, 200, JSON.stringify(night.data));
+        bookingIds.push(night.data.reservation_id);
+        assert.equal(night.data.ends_at.slice(0, 16), "2037-06-21T01:00");
+        const overlap = await request("reservations", "POST", {
+          table_id: tableId,
+          date: "2037-06-21",
+          time: "00:15",
+          guest_count: 2,
+          duration_minutes: 30,
+        });
+        assert.equal(overlap.status, 409, JSON.stringify(overlap.data));
+        const morning = await request("reservations", "POST", {
+          table_id: tableId,
+          date: "2037-06-21",
+          time: "01:00",
+          guest_count: 2,
+          duration_minutes: 30,
+        });
+        assert.equal(morning.status, 200, JSON.stringify(morning.data));
+        bookingIds.push(morning.data.reservation_id);
+        const available = await request(
+          `tables/available?date=2037-06-21&time=00:30&guest_count=2&duration_minutes=30`,
+        );
+        assert.equal(available.status, 200);
+        assert(
+          !available.data.tables.some(
+            (t: { table_id: number }) => t.table_id === tableId,
+          ),
+        );
+      },
+    );
+    await t.test(
       "order placement supports separately customized duplicate dishes",
       async () => {
         const m = await prisma.menuItem.findFirstOrThrow({

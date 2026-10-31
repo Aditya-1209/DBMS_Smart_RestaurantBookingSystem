@@ -8,7 +8,7 @@ The exact nine core entities and original foreign-key cardinalities are preserve
 | Staff has no credentials | Add password VARCHAR(255), active BOOLEAN | Supports authenticated staff and immediate deactivation. The submitted Manager role maps to application administrator; no new Admin core entity or role replaces the submitted roles. |
 | No sessions | Add Session(token_hash PK, customer_id FK nullable, staff_id FK nullable, expires_at), with exactly one principal | Two optional support relationships to customer/staff, both 1:M. Opaque sessions can be invalidated locally. |
 | No login throttle | Add Login_Attempt(key PK, count, window_start) | Hashed email key; no new core relationship. Atomic local brute-force control. |
-| Reservation has only date/time | Add duration_minutes (30–240, default 90) and generated starts_at/ends_at | Keeps original date/time and table/customer foreign keys. ER cardinalities unchanged. Handles booking intervals and cross-midnight direct SQL intervals. Application confines bookings to opening hours. |
+| Reservation has only date/time | Add duration_minutes (30–240, default 90) and generated starts_at/ends_at | Keeps original date/time and table/customer foreign keys. ER cardinalities unchanged. Handles booking intervals and cross-midnight direct SQL intervals. Bookings are accepted 24/7, including intervals crossing midnight. |
 | Trigger checks equal date/time only | Same named trigger checks overlapping intervals and capacity; add partial GiST exclusion constraint | Concurrency-safe invariant for confirmed bookings, including concurrent transactions. Cancelled/completed bookings do not block. Adjacent intervals allowed. |
 | Order_Item PK(order_id,item_id) | Add order_item_id SERIAL PK; retain both original FKs with indexes; permit duplicate dish/order combinations | An order may contain differently customized instances of the same dish. M:N still resolves through Order_Item; no unique(order_id,item_id) remains. MongoDB keys instructions by line ID. |
 | Order_Item only has quantities and prices | Add per-line status Placed/Preparing/Ready/Served | Supports kitchen line workflow; no relationship changes. Historical unit_price and line identity are immutable. |
@@ -24,3 +24,11 @@ The exact nine core entities and original foreign-key cardinalities are preserve
 The original one-to-one Orders–Payment design, menu seed prices, generated line subtotal, nullable order table/staff assignments, and FK deletion policies remain. The final database includes **nine core and three support tables**, plus Prisma's migration metadata table. The ER diagram and relational-schema document include support entities separately.
 
 Strictly, stored subtotal/total and generated reservation boundaries are controlled derived values, not independent normalized facts. See normalization.md for the distinction between the normalized logical design and these original/enhanced physical materializations.
+
+## Demo configuration update
+
+The restaurant now accepts bookings 24/7. The future-date, duration, capacity and exclusion-constraint checks remain; intervals may span midnight. No schema change is required.
+
+The executable seed uses numbered demo emails and the public demo password `password@123`. `npm run demo:reset-logins` can normalize every existing local customer/staff account by ID, update salted password hashes, and revoke existing sessions without changing orders, reservations, or MongoDB references. The historical PDF and original SQL remain unchanged. Database connection passwords and session secrets stay independently generated in `.env`.
+
+Palak paneer, dal makhani, mango kulfi, tandoori mushrooms and vegetable biryani now have separate local photographs. Seeding refreshes their image paths so existing installations receive the new assets.

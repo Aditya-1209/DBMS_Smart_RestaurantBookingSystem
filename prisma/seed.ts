@@ -1,6 +1,6 @@
 import "dotenv/config";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { randomBytes } from "node:crypto";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { DEMO_CREDENTIALS, DEMO_PASSWORD } from "../lib/demo-accounts";
 import mongoose from "mongoose";
 import type {
   Customer,
@@ -19,46 +19,36 @@ import { reconcile } from "../lib/services/orders";
 async function main() {
   mkdirSync(".data", { recursive: true });
   const credentialsPath = ".data/demo-credentials.json";
-  const credentials = existsSync(credentialsPath)
-    ? JSON.parse(readFileSync(credentialsPath, "utf8"))
-    : {
-        password: `Saffron!${randomBytes(9).toString("base64url")}`,
-        customer: "rahul@gmail.com",
-        admin: "vikram@restaurant.com",
-        staff: "karan@restaurant.com",
-        waiter: "priya@restaurant.com",
-        cashier: "meera@restaurant.com",
-      };
-  if (!existsSync(credentialsPath))
-    writeFileSync(credentialsPath, JSON.stringify(credentials, null, 2), {
-      mode: 0o600,
-    });
-  const hashed = await hashPassword(credentials.password);
+  const credentials = DEMO_CREDENTIALS;
+  writeFileSync(credentialsPath, JSON.stringify(credentials, null, 2), {
+    mode: 0o600,
+  });
+  const hashed = await hashPassword(DEMO_PASSWORD);
   const customers: Customer[] = [];
   for (const [name, email, phone] of [
-    ["Rahul Sharma", "rahul@gmail.com", "9876543210"],
-    ["Ananya Singh", "ananya@gmail.com", "9876543211"],
-    ["Arjun Kumar", "arjun@gmail.com", "9876543212"],
+    ["Rahul Sharma", "customer1@gmail.com", "9876543210"],
+    ["Ananya Singh", "customer2@gmail.com", "9876543211"],
+    ["Arjun Kumar", "customer3@gmail.com", "9876543212"],
   ])
     customers.push(
       await prisma.customer.upsert({
-        where: { email },
+        where: { phone },
         create: { name, email, phone, password: hashed },
-        update: {},
+        update: { email, password: hashed },
       }),
     );
   const staff: Staff[] = [];
   for (const [name, email, phone, role] of [
-    ["Vikram Rao", "vikram@restaurant.com", "9000000001", "Manager"],
-    ["Priya Nair", "priya@restaurant.com", "9000000002", "Waiter"],
-    ["Karan Das", "karan@restaurant.com", "9000000003", "Chef"],
-    ["Meera Joshi", "meera@restaurant.com", "9000000004", "Cashier"],
+    ["Vikram Rao", "admin1@gmail.com", "9000000001", "Manager"],
+    ["Priya Nair", "waiter1@gmail.com", "9000000002", "Waiter"],
+    ["Karan Das", "chef1@gmail.com", "9000000003", "Chef"],
+    ["Meera Joshi", "cashier1@gmail.com", "9000000004", "Cashier"],
   ])
     staff.push(
       await prisma.staff.upsert({
-        where: { email },
+        where: { phone },
         create: { name, email, phone, role, password: hashed },
-        update: {},
+        update: { email, password: hashed },
       }),
     );
   const tables: RestaurantTable[] = [];
@@ -106,7 +96,7 @@ async function main() {
       280,
       1,
       "Slow-cooked basmati, seasonal vegetables & fragrant whole spices.",
-      "biryani",
+      "veg-biryani",
       true,
     ],
     [
@@ -138,7 +128,7 @@ async function main() {
       290,
       1,
       "Creamy spinach, soft paneer & a gentle garlic tempering.",
-      "paneer",
+      "palak-paneer",
       true,
     ],
     [
@@ -154,7 +144,7 @@ async function main() {
       210,
       0,
       "Charred mushrooms, hung-curd marinade & toasted spices.",
-      "paneer",
+      "tandoori-mushroom",
       true,
     ],
     [
@@ -162,7 +152,7 @@ async function main() {
       130,
       2,
       "Rich mango frozen dessert with pistachio and saffron.",
-      "dessert",
+      "mango-kulfi",
       true,
     ],
     [
@@ -178,7 +168,7 @@ async function main() {
       260,
       1,
       "Black lentils simmered overnight, finished with butter.",
-      "curry",
+      "dal-makhani",
       true,
     ],
   ];
@@ -203,10 +193,11 @@ async function main() {
           vegetarian,
         },
       });
-    if (item_name === "Masala Chai" && m.image === "/images/drink.jpg")
+    const desiredImage = `/images/${image}.jpg`;
+    if (m.image !== desiredImage)
       m = await prisma.menuItem.update({
         where: { item_id: m.item_id },
-        data: { image: "/images/chai.jpg" },
+        data: { image: desiredImage },
       });
     menu.push(m);
   }
@@ -369,7 +360,7 @@ async function main() {
     "Idempotent seed verified: 9 core entities, 12 dishes, 8 sample orders. Submitted sample bill: ₹880.",
   );
   console.log(
-    "Generated demo credentials: .data/demo-credentials.json (ignored by Git).",
+    "Demo login details: .data/demo-credentials.json (ignored by Git).",
   );
 }
 main()

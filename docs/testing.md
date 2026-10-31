@@ -24,7 +24,7 @@ Tests execute against the actual local Next.js server, PostgreSQL 17 and authent
 | Runtime assets work with non-loopback requests blocked | First browser test; zero external browser requests |
 | ESLint, TypeScript, production build, dependency audit | quality-checks.log; production-build.log |
 
-The Node runner reports **25 passed**: 24 scenario subtests plus the parent suite test. Playwright runs **6 browser scenarios**. Separate native outage/recovery and database restart tests check behavior that mocked tests cannot establish.
+The Node runner reports **26 passed**: 25 scenario subtests plus the parent suite test. Playwright runs **6 browser scenarios**. Separate native outage/recovery and database restart tests check behavior that mocked tests cannot establish.
 
 The final production server is also restarted independently from development; a production health check and stored sample bill verify the same persistent data. See final-verification.log for process and HTTP evidence.
 
@@ -52,3 +52,7 @@ Desktop (1440px), mobile, reservation, bill/review, kitchen and manager screensh
 Run `npm run db:start`, start the app, then run the commands in README.md sequentially. Recovery and persistence tests intentionally stop **only project-owned native database processes**; do not run them against externally managed/shared servers. Install Playwright's browser once during initial setup.
 
 Windows and physical second-laptop execution have not been performed. Offline verification blocks external browser requests and confirms all runtime assets/connections are local; it does not claim an OS-level Wi-Fi-off test. Payment is simulated. Manual table occupancy is a staff responsibility. MongoDB synchronization is retried by order reads, CLI or manager action, not a background daemon. The project is an educational local application, with no real payment gateway or external deployment.
+
+## 24/7 and demo-login update
+
+The added integration scenario books 23:30–01:00, rejects a conflicting reservation at 00:15 the next day, and accepts the adjacent 01:00 slot. The reservation browser scenario uses 00:30, verifying that the form accepts overnight bookings. Demo authentication uses the numbered addresses and `password@123`; credentials remain scrypt hashes in SQL.

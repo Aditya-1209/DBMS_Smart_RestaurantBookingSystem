@@ -14,3 +14,13 @@ All images are stored under public/images and served locally. No runtime image r
 | hero.jpg | [Unsplash Indian meal photograph](https://images.unsplash.com/photo-1546833999-b9f581a1996d) | [Unsplash License](https://unsplash.com/license) |
 
 The CC-licensed images retain their respective attribution/share-alike licenses independently of application code. Earlier generic placeholders and unavailable/rate-limited downloads are not part of the delivered assets. There is no claimed endorsement by photographers or restaurants.
+
+## Dish-specific refresh
+
+- `palak-paneer.jpg`: Leningrad, [Palakpaneer](https://commons.wikimedia.org/wiki/File:Palakpaneer.jpg), [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/), unchanged original.
+- `dal-makhani.jpg`: Charles Haynes, [Dal Makhani](https://commons.wikimedia.org/wiki/File:Dal_Makhani.jpg), [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/), unchanged original.
+- `veg-biryani.jpg`: R103090, [Veg Biryani](https://commons.wikimedia.org/wiki/File:Veg_Biryani.jpg), [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), unchanged original.
+- `mango-kulfi.jpg`: [Ruchi's Kitchen mango kulfi recipe](https://www.ruchiskitchen.com/mango-kulfi/), educational demonstration photograph; rights retained by source.
+- `tandoori-mushroom.jpg`: [Arpita's FoodPod, Tandoori Mushroom Tikka](https://arpitasfoodpod.com/tandoori-mushroom-tikka/), educational demonstration photograph; rights retained by source.
+
+The refreshed dishes each use their own correctly identified image rather than sharing paneer, curry, or gulab jamun photos.
