@@ -9,7 +9,7 @@ PK = primary key; UQ = unique; FK = foreign key; ? = nullable; G = generated. Ph
 | RESTAURANT_TABLE | table_id PK, table_number UQ, capacity, status |
 | CATEGORY | category_id PK, category_name UQ |
 | MENU_ITEM | item_id PK, category_id FK, item_name, description?, price, availability, image, vegetarian |
-| RESERVATION | reservation_id PK, customer_id FK, table_id FK, reservation_date, reservation_time, guest_count, status, duration_minutes, starts_at G, ends_at G |
+| RESERVATION | reservation_id PK, customer_id FK, table_id FK, reservation_date, reservation_time, guest_count, status, duration_minutes, starts_at G, ends_at G, checked_in_at? |
 | ORDERS | order_id PK, customer_id FK, table_id FK?, staff_id FK?, order_date, order_time, status, total_amount, idempotency_key UQ? |
 | ORDER_ITEM | order_item_id PK, order_id FK, item_id FK, quantity, unit_price, subtotal G, status |
 | PAYMENT | payment_id PK, order_id FK UQ, amount, payment_method, payment_status, payment_time |
@@ -28,3 +28,5 @@ Staff roles: Manager, Waiter, Chef, Cashier. Physical tables: Available, Reserve
 Prices, subtotals, totals and payment amounts are DECIMAL(10,2). Quantity is 1–99; capacity 1–30; reservation duration 30–240 minutes; guest count positive and checked against table capacity by trigger. Original date/time columns are DATE/TIME, not UTC instants. Booking starts_at/ends_at are generated timestamp-without-timezone civil values. Session/outbox timestamps use timestamptz.
 
 A GiST exclusion constraint protects confirmed reservation ranges for the same table. Ordinary unique constraints protect contact fields, category names, table numbers, idempotency tokens and payment order IDs. Non-null/default constraints and FK/status indexes are in the migration. See database/sql/schema.sql for executable physical DDL including both migrations; do not apply schema.sql in addition to Prisma migrations.
+
+`Reservation.checked_in_at` is a nullable timestamptz recording staff check-in. It is separate from the civil booking boundaries; no new core entity or relationship was introduced.

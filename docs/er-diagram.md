@@ -50,6 +50,7 @@ erDiagram
     date reservation_date
     time reservation_time
     int duration_minutes
+    timestamp checked_in_at "nullable staff check-in"
     timestamp starts_at "generated"
     timestamp ends_at "generated"
   }

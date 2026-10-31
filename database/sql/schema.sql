@@ -128,3 +128,12 @@ CREATE TRIGGER trg_verify_payment BEFORE INSERT OR UPDATE ON payment FOR EACH RO
 -- Second migration: consistent restaurant civil time on every laptop.
 ALTER DATABASE restaurant_management SET timezone TO 'Asia/Kolkata';
 SET TIMEZONE='Asia/Kolkata';
+
+-- Staff check-in is recorded without changing the original reservation/table relationships.
+ALTER TABLE reservation ADD COLUMN checked_in_at TIMESTAMPTZ;
+
+-- Preserve already-seated reservations from the previous manual occupancy workflow.
+UPDATE reservation r SET checked_in_at=CURRENT_TIMESTAMP FROM restaurant_table t
+WHERE r.table_id=t.table_id AND t.status='Occupied' AND r.status='Confirmed'
+AND r.starts_at <= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')
+AND r.ends_at > (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata');

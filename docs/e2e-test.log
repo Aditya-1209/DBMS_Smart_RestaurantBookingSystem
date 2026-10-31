@@ -3,15 +3,16 @@
 > node --env-file=.env node_modules/@playwright/test/cli.js test
 
 
-Running 6 tests using 1 worker
+Running 7 tests using 1 worker
 
-(node:47011) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(node:77599) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
 (Use `node --trace-warnings ...` to show where the warning was created)
-  ✓  1 tests/e2e/restaurant.spec.ts:58:5 › menu, category filters, search, customized basket and local assets (1.6s)
-  ✓  2 tests/e2e/restaurant.spec.ts:117:5 › customer registration, submitted ₹880 order, simulated payment and review (1.2s)
-  ✓  3 tests/e2e/restaurant.spec.ts:162:5 › customer booking, confirmation and cancellation (951ms)
-  ✓  4 tests/e2e/restaurant.spec.ts:204:5 › chef, waiter and cashier complete the paid customer order (1.3s)
-  ✓  5 tests/e2e/restaurant.spec.ts:250:5 › administrator dashboard, real reports and category CRUD (775ms)
-  ✓  6 tests/e2e/restaurant.spec.ts:293:5 › mobile layout, mobile cart and no horizontal overflow (510ms)
+  ✓  1 tests/e2e/restaurant.spec.ts:58:5 › menu, category filters, search, customized basket and local assets (1.4s)
+  ✓  2 tests/e2e/restaurant.spec.ts:117:5 › customer registration, submitted ₹880 order, simulated payment and review (1.1s)
+  ✓  3 tests/e2e/restaurant.spec.ts:162:5 › customer booking, confirmation and cancellation (880ms)
+  ✓  4 tests/e2e/restaurant.spec.ts:204:5 › chef, waiter and cashier complete the paid customer order (1.2s)
+  ✓  5 tests/e2e/restaurant.spec.ts:250:5 › administrator dashboard, real reports and category CRUD (705ms)
+  ✓  6 tests/e2e/restaurant.spec.ts:293:5 › mobile layout, mobile cart and no horizontal overflow (456ms)
+  ✓  7 tests/e2e/table-assignment.spec.ts:7:5 › staff assigns a reserved table with one click and the customer sees dine-in automatically (11.2s)
 
-  6 passed (7.6s)
+  7 passed (17.8s)

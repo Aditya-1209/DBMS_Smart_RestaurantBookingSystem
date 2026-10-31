@@ -63,7 +63,7 @@ export async function placeOrder(actor: Actor, raw: unknown) {
         );
       const bookings = await tx.$queryRaw<
         { reservation_id: number }[]
-      >`SELECT reservation_id FROM reservation WHERE customer_id=${actor.id} AND table_id=${input.table_id} AND status='Confirmed' AND starts_at<=(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') AND ends_at>(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')`;
+      >`SELECT reservation_id FROM reservation WHERE customer_id=${actor.id} AND table_id=${input.table_id} AND status='Confirmed' AND checked_in_at IS NOT NULL AND starts_at<=(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') AND ends_at>(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')`;
       if (!bookings.length)
         throw new HttpError(
           403,

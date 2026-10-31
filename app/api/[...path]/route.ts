@@ -22,6 +22,10 @@ import {
   payOrder,
   reconcile,
 } from "@/lib/services/orders";
+import {
+  assignReservation,
+  closeReservation,
+} from "@/lib/services/reservations";
 import { Review } from "@/models/Review";
 import { CustomerPreference } from "@/models/CustomerPreference";
 export const runtime = "nodejs";
@@ -181,13 +185,11 @@ async function handle(req: NextRequest, ctx: Context) {
     actor = await requireActor();
     void actor;
     const q = Object.fromEntries(req.nextUrl.searchParams);
-    const b = v.bookingInput
-      .omit({ table_id: true })
-      .parse({
-        ...q,
-        guest_count: Number(q.guest_count),
-        duration_minutes: Number(q.duration_minutes || 90),
-      });
+    const b = v.bookingInput.omit({ table_id: true }).parse({
+      ...q,
+      guest_count: Number(q.guest_count),
+      duration_minutes: Number(q.duration_minutes || 90),
+    });
     return {
       tables: await available(
         b.date,
@@ -201,7 +203,7 @@ async function handle(req: NextRequest, ctx: Context) {
     actor = await requireActor(["customer"]);
     return {
       tables:
-        await prisma.$queryRaw`SELECT DISTINCT t.* FROM restaurant_table t JOIN reservation r ON r.table_id=t.table_id WHERE t.status='Occupied' AND r.customer_id=${actor.id} AND r.status='Confirmed' AND r.starts_at<=(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') AND r.ends_at>(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') ORDER BY t.table_number`,
+        await prisma.$queryRaw`SELECT DISTINCT t.* FROM restaurant_table t JOIN reservation r ON r.table_id=t.table_id WHERE t.status='Occupied' AND r.customer_id=${actor.id} AND r.status='Confirmed' AND r.checked_in_at IS NOT NULL AND r.starts_at<=(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') AND r.ends_at>(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata') ORDER BY t.table_number`,
     };
   }
   if (route === "tables" && method === "GET") {
@@ -246,36 +248,22 @@ async function handle(req: NextRequest, ctx: Context) {
       });
     });
   }
+  if (
+    p[0] === "reservations" &&
+    p.length === 3 &&
+    p[2] === "assign-table" &&
+    method === "POST"
+  ) {
+    actor = await requireActor(["staff", "admin"]);
+    return assignReservation(actor, num(p[1]));
+  }
   if (p[0] === "reservations" && p.length === 2 && method === "PATCH") {
     actor = await requireActor();
-    const id = num(p[1]);
     const b = z
       .object({ status: z.enum(["Cancelled", "Completed"]) })
       .strict()
       .parse(await body(req));
-    return prisma.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT reservation_id FROM reservation WHERE reservation_id=${id} FOR UPDATE`;
-      const r = await tx.reservation.findUnique({
-        where: { reservation_id: id },
-      });
-      if (!r) throw new HttpError(404, "Reservation not found.");
-      if (
-        actor.role === "customer" &&
-        (r.customer_id !== actor.id || b.status !== "Cancelled")
-      )
-        throw new HttpError(403, "This reservation cannot be changed by you.");
-      if (r.status !== "Confirmed")
-        throw new HttpError(409, "This reservation is already closed.");
-      if (
-        actor.role === "customer" &&
-        new Date(r.starts_at.valueOf() - 330 * 60000) <= new Date()
-      )
-        throw new HttpError(
-          409,
-          "A reservation can only be cancelled before its start.",
-        );
-      return tx.reservation.update({ where: { reservation_id: id }, data: b });
-    });
+    return closeReservation(actor, num(p[1]), b.status);
   }
   if (route === "orders" && method === "GET") {
     actor = await requireActor();

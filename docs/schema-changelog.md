@@ -32,3 +32,11 @@ The restaurant now accepts bookings 24/7. The future-date, duration, capacity an
 The executable seed uses numbered demo emails and the public demo password `password@123`. `npm run demo:reset-logins` can normalize every existing local customer/staff account by ID, update salted password hashes, and revoke existing sessions without changing orders, reservations, or MongoDB references. The historical PDF and original SQL remain unchanged. Database connection passwords and session secrets stay independently generated in `.env`.
 
 Palak paneer, dal makhani, mango kulfi, tandoori mushrooms and vegetable biryani now have separate local photographs. Seeding refreshes their image paths so existing installations receive the new assets.
+
+## One-click staff table assignment
+
+Reservation now has nullable `checked_in_at TIMESTAMPTZ`, added by migration `202610310001_reservation_check_in`. The original nine entities, statuses and relationships remain unchanged. This records the specific reservation that was seated, rather than inferring check-in solely from a table's physical status. Existing occupied tables with a currently active confirmed reservation are backfilled to preserve the previous manual workflow.
+
+Front-of-house staff and managers call `POST /api/reservations/:id/assign-table`. A transaction locks the table before its reservation, validates confirmation/time/capacity/occupancy, records check-in and marks the table Occupied. Repeated/concurrent assignment of that same reservation is idempotent. Customers and chefs cannot assign tables; future/expired/cancelled/completed reservations and tables occupied by another party are rejected.
+
+Completing/cancelling a checked-in reservation releases its table when no active orders remain and no later checked-in reservation owns the table. Dine-in eligibility requires the customer's own active, confirmed, explicitly checked-in reservation and Occupied table. The customer menu polls eligibility and refreshes on tab focus.

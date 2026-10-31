@@ -18,7 +18,13 @@ export default function Reservations({ user }: { user: User | null }) {
     [success, setSuccess] = useState(""),
     [selected, setSelected] = useState<Table | null>(null),
     [cancel, setCancel] = useState<Reservation | null>(null),
-    [loading, setLoading] = useState(true);
+    [loading, setLoading] = useState(true),
+    [rowBusy, setRowBusy] = useState<number | null>(null),
+    [now, setNow] = useState(() => Date.now());
+  const team = user?.role !== "customer";
+  const canAssign =
+    user?.role === "admin" ||
+    ["Waiter", "Cashier"].includes(user?.staffRole || "");
   const load = useCallback(async () => {
     const r = await api<{ reservations: Reservation[] }>("reservations");
     setReservations(r.reservations);
@@ -29,6 +35,34 @@ export default function Reservations({ user }: { user: User | null }) {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [load]);
+  useEffect(() => {
+    const refresh = () => {
+      setNow(Date.now());
+      void load().catch((e) => setError(e.message));
+    };
+    const timer = setInterval(refresh, 15000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [load]);
+  async function assign(r: Reservation) {
+    setRowBusy(r.reservation_id);
+    setError("");
+    setSuccess("");
+    try {
+      await api(`reservations/${r.reservation_id}/assign-table`, "POST", {});
+      setSuccess(
+        `Table ${r.table.table_number} assigned to ${r.customer.name}. The guest can now order dine-in.`,
+      );
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setRowBusy(null);
+    }
+  }
   async function search() {
     setError("");
     setSuccess("");
@@ -81,159 +115,184 @@ export default function Reservations({ user }: { user: User | null }) {
       <div className="page-heading">
         <span className="eyebrow">SAVED YOU A SEAT</span>
         <h1>
-          A table for your <em>kind of evening.</em>
+          {team ? (
+            <>
+              Every guest. <em>A seat ready.</em>
+            </>
+          ) : (
+            <>
+              A table for your <em>kind of evening.</em>
+            </>
+          )}
         </h1>
-        <p>Good company deserves a good table. Find yours here.</p>
+        <p>
+          {team
+            ? "Assign a reserved table with one click when the guest arrives during their time slot."
+            : "Good company deserves a good table. Find yours here."}
+        </p>
       </div>
-      <div className="reservation-layout">
-        <section className="panel booking-panel">
-          <div className="panel-title">
-            <CalendarDays size={23} />
-            <div>
-              <h2>Let’s make a date</h2>
-              <p>Open 24/7 · All reservation times are in IST</p>
-            </div>
-          </div>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              void search();
-            }}
-          >
-            <div className="form-grid">
-              <label className="field">
-                Date
-                <input
-                  type="date"
-                  value={date}
-                  min={new Date().toISOString().slice(0, 10)}
-                  onChange={(e) => {
-                    setDate(e.target.value);
-                    invalidate();
-                  }}
-                  required
-                />
-              </label>
-              <label className="field">
-                Arrival time
-                <input
-                  type="time"
-                  value={time}
-                  onChange={(e) => {
-                    setTime(e.target.value);
-                    invalidate();
-                  }}
-                  required
-                />
-              </label>
-              <label className="field">
-                Party size
-                <select
-                  value={guests}
-                  onChange={(e) => {
-                    setGuests(Number(e.target.value));
-                    invalidate();
-                  }}
-                >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 10, 12].map((n) => (
-                    <option key={n} value={n}>
-                      {n} {n === 1 ? "guest" : "guests"}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                Time at the table
-                <select
-                  value={duration}
-                  onChange={(e) => {
-                    setDuration(Number(e.target.value));
-                    invalidate();
-                  }}
-                >
-                  {[30, 60, 90, 120, 180, 240].map((n) => (
-                    <option value={n} key={n}>
-                      {n} minutes
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <button className="button primary full" disabled={busy}>
-              {busy ? "Finding your table…" : "Find available tables"}
-              <ArrowRight size={17} />
-            </button>
-          </form>
-          <ErrorBox error={error} />
-          {success && (
-            <div className="success-box" role="status">
-              <Check size={20} />
-              {success}
-            </div>
-          )}
-          {searched && (
-            <section className="space-top">
-              <h3>{tables.length} tables available</h3>
-              <div className="table-options">
-                {tables.map((t) => (
-                  <button
-                    className="table-option"
-                    key={t.table_id}
-                    onClick={() => setSelected(t)}
-                    disabled={user?.role !== "customer"}
-                  >
-                    <span className="table-drawing">{t.table_number}</span>
-                    <b>Table {t.table_number}</b>
-                    <span>
-                      <Users size={14} />
-                      {t.capacity} seats
-                    </span>
-                    <small>Choose this table</small>
-                  </button>
-                ))}
+      {!team && (
+        <div className="reservation-layout">
+          <section className="panel booking-panel">
+            <div className="panel-title">
+              <CalendarDays size={23} />
+              <div>
+                <h2>Let’s make a date</h2>
+                <p>Open 24/7 · All reservation times are in IST</p>
               </div>
-              {tables.length === 0 && (
-                <Empty title="A full house for that time">
-                  Try another time or a smaller party.
-                </Empty>
-              )}
-            </section>
-          )}
-        </section>
-        <aside className="reservation-note">
-          <span className="eyebrow">A WARM WELCOME AWAITS</span>
-          <h2>
-            Make time
-            <br />
-            for <em>good food.</em>
-          </h2>
-          <p>
-            Catch up over a slow lunch, celebrate something special, or turn an
-            ordinary evening into a lovely one.
-          </p>
-          <div>
-            <Clock size={18} />
-            <span>
-              Your reservation includes the full time you select. Adjacent
-              bookings can start exactly when yours ends.
-            </span>
-          </div>
-          <div>
-            <Users size={18} />
-            <span>
-              Groups larger than eight? Our team will help you find the right
-              arrangement.
-            </span>
-          </div>
-          <div>
-            <CalendarDays size={18} />
-            <span>
-              Plans change. Cancel your reservation any time before it starts.
-            </span>
-          </div>
-        </aside>
-      </div>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void search();
+              }}
+            >
+              <div className="form-grid">
+                <label className="field">
+                  Date
+                  <input
+                    type="date"
+                    value={date}
+                    min={new Date().toISOString().slice(0, 10)}
+                    onChange={(e) => {
+                      setDate(e.target.value);
+                      invalidate();
+                    }}
+                    required
+                  />
+                </label>
+                <label className="field">
+                  Arrival time
+                  <input
+                    type="time"
+                    value={time}
+                    onChange={(e) => {
+                      setTime(e.target.value);
+                      invalidate();
+                    }}
+                    required
+                  />
+                </label>
+                <label className="field">
+                  Party size
+                  <select
+                    value={guests}
+                    onChange={(e) => {
+                      setGuests(Number(e.target.value));
+                      invalidate();
+                    }}
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 10, 12].map((n) => (
+                      <option key={n} value={n}>
+                        {n} {n === 1 ? "guest" : "guests"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  Time at the table
+                  <select
+                    value={duration}
+                    onChange={(e) => {
+                      setDuration(Number(e.target.value));
+                      invalidate();
+                    }}
+                  >
+                    {[30, 60, 90, 120, 180, 240].map((n) => (
+                      <option value={n} key={n}>
+                        {n} minutes
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <button className="button primary full" disabled={busy}>
+                {busy ? "Finding your table…" : "Find available tables"}
+                <ArrowRight size={17} />
+              </button>
+            </form>
+            <ErrorBox error={error} />
+            {success && (
+              <div className="success-box" role="status">
+                <Check size={20} />
+                {success}
+              </div>
+            )}
+            {searched && (
+              <section className="space-top">
+                <h3>{tables.length} tables available</h3>
+                <div className="table-options">
+                  {tables.map((t) => (
+                    <button
+                      className="table-option"
+                      key={t.table_id}
+                      onClick={() => setSelected(t)}
+                      disabled={user?.role !== "customer"}
+                    >
+                      <span className="table-drawing">{t.table_number}</span>
+                      <b>Table {t.table_number}</b>
+                      <span>
+                        <Users size={14} />
+                        {t.capacity} seats
+                      </span>
+                      <small>Choose this table</small>
+                    </button>
+                  ))}
+                </div>
+                {tables.length === 0 && (
+                  <Empty title="A full house for that time">
+                    Try another time or a smaller party.
+                  </Empty>
+                )}
+              </section>
+            )}
+          </section>
+          <aside className="reservation-note">
+            <span className="eyebrow">A WARM WELCOME AWAITS</span>
+            <h2>
+              Make time
+              <br />
+              for <em>good food.</em>
+            </h2>
+            <p>
+              Catch up over a slow lunch, celebrate something special, or turn
+              an ordinary evening into a lovely one.
+            </p>
+            <div>
+              <Clock size={18} />
+              <span>
+                Your reservation includes the full time you select. Adjacent
+                bookings can start exactly when yours ends.
+              </span>
+            </div>
+            <div>
+              <Users size={18} />
+              <span>
+                Groups larger than eight? Our team will help you find the right
+                arrangement.
+              </span>
+            </div>
+            <div>
+              <CalendarDays size={18} />
+              <span>
+                Plans change. Cancel your reservation any time before it starts.
+              </span>
+            </div>
+          </aside>
+        </div>
+      )}
       <section className="space-top">
+        {team && (
+          <>
+            <ErrorBox error={error} />
+            {success && (
+              <div className="success-box" role="status">
+                <Check size={18} />
+                {success}
+              </div>
+            )}
+          </>
+        )}
         <div className="section-heading">
           <h2>
             {user?.role === "customer"
@@ -264,6 +323,11 @@ export default function Reservations({ user }: { user: User | null }) {
                 <div>
                   <h3>
                     Table {r.table.table_number} <Badge status={r.status} />
+                    {r.status === "Confirmed" &&
+                      r.checked_in_at &&
+                      r.table.status === "Occupied" && (
+                        <span className="badge available">Checked in</span>
+                      )}
                   </h3>
                   <p>
                     {r.reservation_time.slice(11, 16)} IST ·{" "}
@@ -276,7 +340,38 @@ export default function Reservations({ user }: { user: User | null }) {
                 </div>
                 {r.status === "Confirmed" && (
                   <div className="row">
-                    {user?.role !== "customer" && (
+                    {canAssign &&
+                      (() => {
+                        const current =
+                          new Date(r.starts_at).valueOf() - 330 * 60000 <=
+                            now &&
+                          new Date(r.ends_at).valueOf() - 330 * 60000 > now;
+                        const assigned =
+                          Boolean(r.checked_in_at) &&
+                          r.table.status === "Occupied";
+                        return (
+                          <button
+                            className="button primary small"
+                            disabled={rowBusy !== null || !current || assigned}
+                            title={
+                              !current
+                                ? "Available during the reservation time slot"
+                                : assigned
+                                  ? "This guest is already checked in"
+                                  : "Check in this reservation and mark the table occupied"
+                            }
+                            onClick={() => assign(r)}
+                          >
+                            {rowBusy === r.reservation_id
+                              ? "Assigning…"
+                              : assigned
+                                ? "Table assigned"
+                                : "Assign table"}
+                            <Check size={15} />
+                          </button>
+                        );
+                      })()}
+                    {canAssign && (
                       <button
                         className="button outline small"
                         onClick={async () => {
@@ -297,6 +392,7 @@ export default function Reservations({ user }: { user: User | null }) {
                     )}
                     <button
                       className="text-button danger"
+                      disabled={rowBusy !== null || Boolean(team && !canAssign)}
                       onClick={() => setCancel(r)}
                     >
                       Cancel

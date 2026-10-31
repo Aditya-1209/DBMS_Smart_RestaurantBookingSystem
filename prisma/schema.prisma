@@ -64,6 +64,7 @@ model Reservation {
   table_id Int
   reservation_date DateTime @db.Date
   reservation_time DateTime @db.Time(6)
+  checked_in_at DateTime? @db.Timestamptz(6)
   duration_minutes Int @default(90)
   starts_at DateTime @default(dbgenerated()) @db.Timestamp(6)
   ends_at DateTime @default(dbgenerated()) @db.Timestamp(6)

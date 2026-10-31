@@ -549,6 +549,167 @@ test(
       },
     );
     await t.test(
+      "one-click staff assignment enables only the reserved guest's dine-in and releases on completion",
+      async () => {
+        const [r] = await prisma.$queryRaw<
+          { reservation_id: number }[]
+        >`INSERT INTO reservation(customer_id,table_id,reservation_date,reservation_time,guest_count,duration_minutes) VALUES(${createdCustomer},${tableId},((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')-INTERVAL '5 minutes')::date,((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata')-INTERVAL '5 minutes')::time,2,90) RETURNING reservation_id`;
+        bookingIds.push(r.reservation_id);
+        const endpoint = `reservations/${r.reservation_id}/assign-table`;
+        assert.equal((await request(endpoint, "POST", {}, "new")).status, 403);
+        assert.equal((await request(endpoint, "POST", {}, "chef")).status, 403);
+        // Occupied tables cannot be claimed for an unrelated guest.
+        await prisma.restaurantTable.update({
+          where: { table_id: tableId },
+          data: { status: "Occupied" },
+        });
+        assert.equal(
+          (await request(endpoint, "POST", {}, "waiter")).status,
+          409,
+        );
+        assert.equal(
+          (
+            await prisma.reservation.findUniqueOrThrow({
+              where: { reservation_id: r.reservation_id },
+            })
+          ).checked_in_at,
+          null,
+        );
+        await prisma.restaurantTable.update({
+          where: { table_id: tableId },
+          data: { status: "Available" },
+        });
+        const before = await request(
+          "tables/eligible",
+          "GET",
+          undefined,
+          "new",
+        );
+        assert(
+          !before.data.tables.some(
+            (t: { table_id: number }) => t.table_id === tableId,
+          ),
+        );
+        const results = await Promise.all([
+          request(endpoint, "POST", {}, "waiter"),
+          request(endpoint, "POST", {}, "waiter"),
+        ]);
+        assert(
+          results.every((x) => x.status === 200),
+          JSON.stringify(results.map((x) => x.data)),
+        );
+        assert.equal(
+          results[0].data.checked_in_at,
+          results[1].data.checked_in_at,
+        );
+        assert.equal(results[0].data.table.status, "Occupied");
+        const guest = await request("tables/eligible", "GET", undefined, "new");
+        assert(
+          guest.data.tables.some(
+            (t: { table_id: number }) => t.table_id === tableId,
+          ),
+        );
+        const other = await request("tables/eligible");
+        assert(
+          !other.data.tables.some(
+            (t: { table_id: number }) => t.table_id === tableId,
+          ),
+        );
+        const item = await prisma.menuItem.findFirstOrThrow({
+          where: { item_name: "Paneer Tikka" },
+        });
+        assert.equal(
+          (
+            await request("orders", "POST", {
+              table_id: tableId,
+              idempotency_key: randomUUID(),
+              items: [
+                { item_id: item.item_id, quantity: 1, customizations: custom },
+              ],
+            })
+          ).status,
+          403,
+        );
+        let dineInOrder = 0;
+        try {
+          const order = await request(
+            "orders",
+            "POST",
+            {
+              table_id: tableId,
+              idempotency_key: randomUUID(),
+              items: [
+                { item_id: item.item_id, quantity: 1, customizations: custom },
+              ],
+            },
+            "new",
+          );
+          assert.equal(order.status, 200, JSON.stringify(order.data));
+          dineInOrder = order.data.order_id;
+          assert.equal(
+            (
+              await request(
+                `reservations/${r.reservation_id}`,
+                "PATCH",
+                { status: "Completed" },
+                "waiter",
+              )
+            ).status,
+            409,
+          );
+        } finally {
+          if (dineInOrder) {
+            await OrderCustomization.deleteMany({ order_id: dineInOrder });
+            await prisma.orders.delete({ where: { order_id: dineInOrder } });
+          }
+        }
+        assert.equal(
+          (
+            await request(
+              `reservations/${r.reservation_id}`,
+              "PATCH",
+              { status: "Completed" },
+              "waiter",
+            )
+          ).status,
+          200,
+        );
+        assert.equal(
+          (
+            await prisma.restaurantTable.findUniqueOrThrow({
+              where: { table_id: tableId },
+            })
+          ).status,
+          "Available",
+        );
+        assert.equal(
+          (await request(endpoint, "POST", {}, "waiter")).status,
+          409,
+        );
+        // A future reservation cannot occupy a table ahead of its slot.
+        const future = await request("reservations", "POST", {
+          table_id: tableId,
+          date: "2038-07-10",
+          time: "12:00",
+          guest_count: 2,
+          duration_minutes: 90,
+        });
+        assert.equal(future.status, 200);
+        bookingIds.push(future.data.reservation_id);
+        assert.equal(
+          (
+            await request(
+              `reservations/${future.data.reservation_id}/assign-table`,
+              "POST",
+              {},
+              "waiter",
+            )
+          ).status,
+          409,
+        );
+      },
+    );
+    await t.test(
       "order placement supports separately customized duplicate dishes",
       async () => {
         const m = await prisma.menuItem.findFirstOrThrow({

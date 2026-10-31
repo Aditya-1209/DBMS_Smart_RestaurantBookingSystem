@@ -114,10 +114,24 @@ export default function RestaurantApp({ view }: { view: string }) {
     });
   }, [loadMenu]);
   useEffect(() => {
-    if (user?.role === "customer")
+    if (user?.role !== "customer") return;
+    let active = true;
+    const refresh = () =>
       api<{ tables: Table[] }>("tables/eligible")
-        .then((r) => setDiningTables(r.tables))
-        .catch((e) => setError(e.message));
+        .then((r) => {
+          if (active) setDiningTables(r.tables);
+        })
+        .catch((e) => {
+          if (active) setError(e.message);
+        });
+    void refresh();
+    const timer = setInterval(refresh, 10000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      active = false;
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+    };
   }, [user]);
   useEffect(() => {
     if (hydrated) localStorage.setItem("saffron-cart", JSON.stringify(cart));
@@ -283,8 +297,8 @@ export default function RestaurantApp({ view }: { view: string }) {
           </label>
           {tableId && (
             <small>
-              Staff must check you into your current reservation before ordering
-              for a table.
+              Your reservation is checked in and this table is ready for
+              dine-in.
             </small>
           )}
           <div className="cart-totals">

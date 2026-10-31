@@ -130,7 +130,7 @@ For an existing MongoDB instance, set `MONGO_ADMIN_URL` for setup if administrat
 4. Open the order, print the bill, choose Cash/Card/UPI, and simulate payment. No real money moves and no card data is collected. Submit or edit an overall and per-dish review.
 5. Book a table for a future time. A 19:00–20:30 reservation conflicts with 19:30–21:00 on that table; a booking starting at 20:30 is allowed. All booking times use **Asia/Kolkata**. Only future reservations can be customer-cancelled.
 6. Sign in as a chef. Open kitchen tickets to see MongoDB instructions, prepare orders and mark them ready. A waiter marks them served; a cashier or manager closes paid, served orders.
-7. A waiter can mark an occupied table after checking a guest in. Dine-in ordering only offers the customer's currently active, confirmed reservation at an occupied table. Future bookings alone do not authorize dine-in orders.
+7. Staff open **Reserve a table → Reservation schedule** and click **Assign table** on the arriving guest’s active reservation. One click checks the guest in and marks their reserved table occupied. The customer’s dining options refresh automatically (within 10 seconds, or immediately when returning to the tab). Click **Complete** after the table’s orders are closed to release it. Future reservations cannot be checked in early.
 8. Open the administrator dashboard for real SQL revenue, methods, popular dishes and order statistics. Manage dishes, categories, staff, tables, reservations, orders and payment records. Referenced records are protected by foreign keys; use availability/deactivation where deleting history would be inappropriate.
 9. Save dietary preferences, cuisines, spice level and allergens. These persist in MongoDB; they do not automatically guarantee an allergen-free meal.
 
@@ -147,8 +147,8 @@ For an existing MongoDB instance, set `MONGO_ADMIN_URL` for setup if administrat
 | `npm run dev` | Development Next.js server on loopback port 3000 |
 | `npm run build` / `npm start` | Production build and loopback server |
 | `npm run typecheck` / `npm run lint` | TypeScript and ESLint checks |
-| `npm test` | 25 integration scenarios against a running server and both databases |
-| `npm run test:e2e` | 6 browser scenarios and screenshots; first run `npx playwright install chromium` |
+| `npm test` | 26 integration scenarios against a running server and both databases |
+| `npm run test:e2e` | 7 browser scenarios and screenshots; first run `npx playwright install chromium` |
 | `npm run test:recovery` | Stops only this checkout's MongoDB to verify durable outbox recovery |
 | `node --import tsx tests/persistence.ts` | Restart only project-owned database services and compare persistent records |
 

@@ -24,7 +24,7 @@ Tests execute against the actual local Next.js server, PostgreSQL 17 and authent
 | Runtime assets work with non-loopback requests blocked | First browser test; zero external browser requests |
 | ESLint, TypeScript, production build, dependency audit | quality-checks.log; production-build.log |
 
-The Node runner reports **26 passed**: 25 scenario subtests plus the parent suite test. Playwright runs **6 browser scenarios**. Separate native outage/recovery and database restart tests check behavior that mocked tests cannot establish.
+The Node runner reports **27 passed**: 26 scenario subtests plus the parent suite test. Playwright runs **7 browser scenarios**. Separate native outage/recovery and database restart tests check behavior that mocked tests cannot establish.
 
 The final production server is also restarted independently from development; a production health check and stored sample bill verify the same persistent data. See final-verification.log for process and HTTP evidence.
 
@@ -56,3 +56,7 @@ Windows and physical second-laptop execution have not been performed. Offline ve
 ## 24/7 and demo-login update
 
 The added integration scenario books 23:30–01:00, rejects a conflicting reservation at 00:15 the next day, and accepts the adjacent 01:00 slot. The reservation browser scenario uses 00:30, verifying that the form accepts overnight bookings. Demo authentication uses the numbered addresses and `password@123`; credentials remain scrypt hashes in SQL.
+
+## One-click assignment verification
+
+The added integration scenario checks customer/chef authorization, occupied-table rejection without partial check-in, concurrent idempotent assignment, owner-only dine-in eligibility and orders, active-order completion protection, release after completion, and rejection of future/closed bookings. A browser test opens a customer's basket before staff assignment, clicks Assign table once from the staff reservation page, verifies exactly one request and automatic customer dine-in visibility, then completes the reservation and verifies release. Screenshots: staff-assign-table.png and customer-assigned-table.png.

@@ -45,6 +45,7 @@ export type Reservation = {
   reservation_time: string;
   starts_at: string;
   ends_at: string;
+  checked_in_at: string | null;
   duration_minutes: number;
   guest_count: number;
   status: string;

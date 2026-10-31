@@ -27,3 +27,9 @@ Use npm run dev instead of npm start for development. Stop the app with Ctrl+C a
 Restaurant hours are now 24/7, including cross-midnight reservations. Local application accounts use numbered addresses (`customer1@gmail.com`, `admin1@gmail.com`, `chef1@gmail.com`, `waiter1@gmail.com`, `cashier1@gmail.com`) and the requested public demo password `password@123`. Account IDs, role assignments and historical records are preserved. The README remains free of device-specific paths and account details.
 
 Five mismatched dish images were replaced with real dish-specific local photos. The updated production build passed lint, TypeScript, 25 integration scenarios (26 Node passes including the parent), and all six browser scenarios. The new integration test verifies midnight availability and cross-date overlap protection; the reservation browser scenario books 00:30. Updated screenshots and execution logs are included.
+
+## One-click table assignment
+
+Front-of-house staff and managers now assign the reserved table from the reservation schedule with one click. A checked-in timestamp and table occupancy update commit atomically; future/closed bookings, unauthorized roles and occupied tables are rejected. Customers see the dine-in option automatically within ten seconds or on tab focus. Completing a checked-in reservation releases the table after its active orders are closed.
+
+The local migration was applied and the production app rebuilt. Verification passed: 26 integration scenarios (27 Node test passes including the parent), seven browser scenarios, lint, TypeScript and production build. The new browser scenario verifies exactly one assignment request and the handoff to an already-open customer basket.
